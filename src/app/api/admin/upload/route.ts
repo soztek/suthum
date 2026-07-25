@@ -34,17 +34,24 @@ export async function POST(req: Request) {
     const bytes = Buffer.from(await file.arrayBuffer());
     const filename = `${randomUUID()}.${ext}`;
 
-    // Üretim (Vercel): kalıcı depolama için Vercel Blob'a yükle.
-    // Yeni Blob mimarisi OIDC kullanır (statik token yok) → BLOB_STORE_ID yeterli.
-    if (process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID) {
+    // Blob token'ını ön ekten bağımsız bul: BLOB_READ_WRITE_TOKEN veya <PREFIX>_READ_WRITE_TOKEN.
+    const blobToken =
+      process.env.BLOB_READ_WRITE_TOKEN ||
+      Object.keys(process.env)
+        .filter((k) => k.endsWith("_READ_WRITE_TOKEN"))
+        .map((k) => process.env[k])
+        .find(Boolean);
+    // OIDC (token'sız) senaryosu için bir Blob store bağlı mı?
+    const hasStore =
+      Boolean(process.env.BLOB_STORE_ID) ||
+      Object.keys(process.env).some((k) => k.endsWith("_STORE_ID"));
+
+    if (blobToken || hasStore) {
       const { put } = await import("@vercel/blob");
       const blob = await put(`uploads/${filename}`, bytes, {
         access: "public",
         contentType: file.type,
-        // Token varsa kullan; yoksa OIDC ile otomatik kimlik doğrulanır.
-        ...(process.env.BLOB_READ_WRITE_TOKEN
-          ? { token: process.env.BLOB_READ_WRITE_TOKEN }
-          : {}),
+        ...(blobToken ? { token: blobToken } : {}),
       });
       return NextResponse.json({ url: blob.url });
     }
@@ -54,7 +61,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           error:
-            "Fotoğraf deposu (Blob) yapılandırılmamış. Vercel → Storage → Blob oluşturup projeye bağlayın ve yeniden deploy edin.",
+            "Fotoğraf deposu (Blob) bulunamadı. Vercel → Storage → Blob oluşturup projeye bağlayın ve yeniden deploy edin.",
         },
         { status: 500 }
       );
