@@ -18,8 +18,14 @@ export function ImageUpload({ name, defaultValue = "" }: { name: string; default
       const fd = new FormData();
       fd.append("file", file);
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Yükleme başarısız");
+      const text = await res.text();
+      let data: { url?: string; error?: string } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { error: `Sunucu beklenmedik yanıt verdi (HTTP ${res.status}).` };
+      }
+      if (!res.ok || !data.url) throw new Error(data.error || `Yükleme başarısız (HTTP ${res.status})`);
       setUrl(data.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Yükleme başarısız");
