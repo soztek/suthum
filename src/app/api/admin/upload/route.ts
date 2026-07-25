@@ -34,25 +34,47 @@ export async function POST(req: Request) {
     const bytes = Buffer.from(await file.arrayBuffer());
     const filename = `${randomUUID()}.${ext}`;
 
-    // Blob token'ını ön ekten bağımsız bul: BLOB_READ_WRITE_TOKEN veya <PREFIX>_READ_WRITE_TOKEN.
-    const blobToken =
-      process.env.BLOB_READ_WRITE_TOKEN ||
-      Object.keys(process.env)
-        .filter((k) => k.endsWith("_READ_WRITE_TOKEN"))
-        .map((k) => process.env[k])
-        .find(Boolean);
-    // OIDC (token'sız) senaryosu için bir Blob store bağlı mı?
-    const hasStore =
-      Boolean(process.env.BLOB_STORE_ID) ||
-      Object.keys(process.env).some((k) => k.endsWith("_STORE_ID"));
+    // Ortamdaki tüm Blob read-write token'larını topla (prefix ve büyük/küçük harf bağımsız).
+    const tokens = [
+      process.env.BLOB_READ_WRITE_TOKEN,
+      ...Object.keys(process.env)
+        .filter((k) => k.toUpperCase().endsWith("_READ_WRITE_TOKEN"))
+        .map((k) => process.env[k]),
+    ].filter((v): v is string => Boolean(v));
+    const uniqueTokens = [...new Set(tokens)];
 
-    if (blobToken || hasStore) {
+    if (uniqueTokens.length > 0) {
       const { put } = await import("@vercel/blob");
-      const blob = await put(`uploads/${filename}`, bytes, {
+      let lastError: unknown = null;
+      // Her token'ı dene: private depo "public access" hatası verirse sonrakine geç,
+      // public depo çalışınca dur.
+      for (const token of uniqueTokens) {
+        try {
+          const blob = await put(`uploads/${filename}`, bytes, {
+            access: "public",
+            contentType: file.type,
+            token,
+          });
+          return NextResponse.json({ url: blob.url });
+        } catch (e) {
+          lastError = e;
+        }
+      }
+      throw lastError ?? new Error("Blob yüklemesi başarısız");
+    }
+
+    // Token yoksa OIDC (storeId) ile dene.
+    const storeIdKey = Object.keys(process.env).find((k) =>
+      k.toUpperCase().endsWith("_STORE_ID")
+    );
+    if (storeIdKey) {
+      const { put } = await import("@vercel/blob");
+      const opts = {
         access: "public",
         contentType: file.type,
-        ...(blobToken ? { token: blobToken } : {}),
-      });
+        storeId: process.env[storeIdKey],
+      } as Parameters<typeof put>[2];
+      const blob = await put(`uploads/${filename}`, bytes, opts);
       return NextResponse.json({ url: blob.url });
     }
 
