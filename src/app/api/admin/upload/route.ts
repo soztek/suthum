@@ -35,17 +35,21 @@ export async function POST(req: Request) {
     const filename = `${randomUUID()}.${ext}`;
 
     // Üretim (Vercel): kalıcı depolama için Vercel Blob'a yükle.
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
+    // Yeni Blob mimarisi OIDC kullanır (statik token yok) → BLOB_STORE_ID yeterli.
+    if (process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID) {
       const { put } = await import("@vercel/blob");
       const blob = await put(`uploads/${filename}`, bytes, {
         access: "public",
         contentType: file.type,
-        token: process.env.BLOB_READ_WRITE_TOKEN,
+        // Token varsa kullan; yoksa OIDC ile otomatik kimlik doğrulanır.
+        ...(process.env.BLOB_READ_WRITE_TOKEN
+          ? { token: process.env.BLOB_READ_WRITE_TOKEN }
+          : {}),
       });
       return NextResponse.json({ url: blob.url });
     }
 
-    // Vercel'de Blob token yoksa diske yazılamaz (salt-okunur dosya sistemi).
+    // Vercel'de Blob yoksa diske yazılamaz (salt-okunur dosya sistemi).
     if (process.env.VERCEL) {
       return NextResponse.json(
         {
