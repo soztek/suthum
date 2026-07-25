@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  emoji     String?
+  imageUrl  String?
+  order     Int       @default(0)
+  isActive  Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?     @db.Text
+  price       Decimal     @db.Decimal(10, 2)
+  compareAt   Decimal?    @db.Decimal(10, 2) // eski/liste fiyatı (indirim rozeti için)
+  unit        String? // "1 KG", "500 GR" vb.
+  imageUrl    String?
+  images      String[]    @default([])
+  stock       Int         @default(100)
+  isActive    Boolean     @default(true)
+  isFeatured  Boolean     @default(false)
+  coldChain   Boolean     @default(false) // soğuk zincir gönderim rozeti
+  rating      Float       @default(5)
+  reviewCount Int         @default(0)
+  order       Int         @default(0)
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([categoryId])
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  orderNo       String        @unique
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+
+  fullName String
+  email    String
+  phone    String
+  address  String  @db.Text
+  city     String
+  district String?
+  note     String? @db.Text
+
+  subtotal Decimal @db.Decimal(10, 2)
+  shipping Decimal @db.Decimal(10, 2) @default(0)
+  total    Decimal @db.Decimal(10, 2)
+
+  iyziToken     String?
+  iyziPaymentId String?
+
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  name      String
+  unit      String?
+  unitPrice Decimal  @db.Decimal(10, 2)
+  quantity  Int
+  lineTotal Decimal  @db.Decimal(10, 2)
+
+  @@index([orderId])
+}
+
+// Site geneli ayarlar (tek satır, id = "main")
+model Setting {
+  id                String  @id @default("main")
+  siteName          String  @default("SÜTHÜM")
+  tagline           String  @default("Ardahan'ın Doğal Lezzetleri")
+  phone             String  @default("0478 000 00 00")
+  whatsapp          String  @default("905300000000")
+  email             String  @default("info@suthum.com")
+  instagram         String  @default("suthum")
+  address           String  @default("Ardahan, Türkiye")
+  freeShippingLimit Decimal @db.Decimal(10, 2) @default(2000)
+  shippingFee       Decimal @db.Decimal(10, 2) @default(89.90)
+  heroTitle         String  @default("Ardahan'ın Yaylalarından Sofranıza")
+  heroSubtitle      String  @default("Doğal, katkısız ve yöresel lezzetler; soğuk zincirle kapınızda.")
+  announcement      String  @default("₺2000 ve üzeri siparişlerde ÜCRETSİZ soğuk zincir kargo")
+  updatedAt         DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
