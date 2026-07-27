@@ -17,7 +17,7 @@ const LABELS: Record<string, string> = {
 export default async function AdminOrders() {
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
-    include: { items: true },
+    include: { items: true, user: { select: { name: true } } },
   });
 
   return (
@@ -39,6 +39,9 @@ export default async function AdminOrders() {
                     <OrderStatusBadge status={o.status} />
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${o.paymentStatus === "PAID" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
                       {o.paymentStatus === "PAID" ? "Ödendi" : o.paymentStatus === "FAILED" ? "Başarısız" : "Ödeme Bekliyor"}
+                    </span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${o.user ? "bg-green-600 text-white" : "bg-ink/10 text-ink/50"}`}>
+                      {o.user ? "Üye" : "Misafir"}
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-ink/50">

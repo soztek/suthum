@@ -11,7 +11,13 @@ interface NavCat {
   emoji?: string | null;
 }
 
-export function MobileNav({ categories }: { categories: NavCat[] }) {
+export function MobileNav({
+  categories,
+  userName,
+}: {
+  categories: NavCat[];
+  userName?: string | null;
+}) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -58,6 +64,23 @@ export function MobileNav({ categories }: { categories: NavCat[] }) {
           <Link href="/iletisim" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
             İletişim
           </Link>
+        </div>
+
+        <div className="mt-4 border-t border-green-100 pt-4">
+          {userName ? (
+            <Link href="/hesabim" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2.5 font-semibold text-green-700">
+              👤 Hesabım ({userName.split(" ")[0]})
+            </Link>
+          ) : (
+            <div className="flex gap-2">
+              <Link href="/giris" onClick={() => setOpen(false)} className="flex-1 rounded-lg border border-green-200 px-3 py-2.5 text-center font-semibold text-green-700 hover:bg-green-50">
+                Giriş
+              </Link>
+              <Link href="/kayit" onClick={() => setOpen(false)} className="flex-1 rounded-lg bg-orange-500 px-3 py-2.5 text-center font-semibold text-white hover:bg-orange-600">
+                Üye Ol
+              </Link>
+            </div>
+          )}
         </div>
       </nav>
     </div>

@@ -1,19 +1,21 @@
 import Link from "next/link";
-import { Phone } from "lucide-react";
+import { Phone, User } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
+import { getCurrentUser } from "@/lib/user-auth";
 import { CartButton } from "./cart/CartButton";
 import { MobileNav } from "./MobileNav";
 import { CategoryIcon } from "./CategoryIcon";
 
 export async function Header() {
-  const [settings, categories] = await Promise.all([
+  const [settings, categories, user] = await Promise.all([
     getSettings(),
     prisma.category.findMany({
       where: { isActive: true },
       orderBy: { order: "asc" },
       select: { name: true, slug: true, emoji: true },
     }),
+    getCurrentUser(),
   ]);
 
   return (
@@ -37,7 +39,7 @@ export async function Header() {
 
       <header className="sticky top-0 z-40 border-b border-green-100 bg-cream/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
-          <MobileNav categories={categories} />
+          <MobileNav categories={categories} userName={user?.name ?? null} />
 
           <Link href="/" className="flex shrink-0 items-center" aria-label={settings.siteName}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -55,6 +57,13 @@ export async function Header() {
             <a href={`tel:${settings.phone.replace(/\s/g, "")}`} className="hidden items-center gap-2 rounded-full border border-green-200 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-50 md:flex">
               <Phone size={16} /> {settings.phone}
             </a>
+            <Link
+              href={user ? "/hesabim" : "/giris"}
+              className="hidden items-center gap-2 rounded-full border border-green-200 px-4 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 sm:flex"
+            >
+              <User size={16} />
+              <span className="hidden lg:inline">{user ? user.name.split(" ")[0] : "Giriş"}</span>
+            </Link>
             <CartButton />
           </div>
         </div>

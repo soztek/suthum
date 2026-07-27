@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { orderNo, toNumber } from "@/lib/utils";
 import { isPaymentLive, initCheckoutForm } from "@/lib/iyzico";
+import { getCurrentUser } from "@/lib/user-auth";
 
 const schema = z.object({
   customer: z.object({
@@ -62,6 +63,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Sepetteki ürünler bulunamadı" }, { status: 400 });
   }
 
+  const currentUser = await getCurrentUser();
   const settings = await getSettings();
   const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
   const freeLimit = toNumber(settings.freeShippingLimit);
@@ -79,6 +81,7 @@ export async function POST(req: Request) {
       city: customer.city,
       district: customer.district || null,
       note: customer.note || null,
+      userId: currentUser?.id ?? null,
       subtotal: new Prisma.Decimal(subtotal.toFixed(2)),
       shipping: new Prisma.Decimal(shipping.toFixed(2)),
       total: new Prisma.Decimal(total.toFixed(2)),

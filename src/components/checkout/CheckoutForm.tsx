@@ -12,22 +12,30 @@ export function CheckoutForm({
   freeShippingLimit,
   shippingFee,
   paymentLive,
+  initial,
 }: {
   freeShippingLimit: number;
   shippingFee: number;
   paymentLive: boolean;
+  initial?: {
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    city?: string;
+    address?: string;
+  };
 }) {
   const { items, subtotal, clear } = useCart();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    city: "",
+    fullName: initial?.fullName ?? "",
+    email: initial?.email ?? "",
+    phone: initial?.phone ?? "",
+    city: initial?.city ?? "",
     district: "",
-    address: "",
+    address: initial?.address ?? "",
     note: "",
   });
 
