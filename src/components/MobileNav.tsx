@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
@@ -12,6 +13,55 @@ interface NavCat {
 
 export function MobileNav({ categories }: { categories: NavCat[] }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  // Menü açıkken arka planın kaymasını engelle
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [open]);
+
+  const overlay = open ? (
+    <div className="fixed inset-0 z-[60] lg:hidden">
+      <div className="absolute inset-0 bg-ink/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
+      <nav className="absolute left-0 top-0 flex h-full w-72 max-w-[82%] flex-col overflow-y-auto bg-cream p-5 shadow-2xl">
+        <div className="mb-6 flex items-center justify-between">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="SÜT-HÜM" className="h-11 w-auto" />
+          <button onClick={() => setOpen(false)} className="rounded-full p-1.5 text-ink/60 hover:bg-green-50" aria-label="Kapat">
+            <X size={22} />
+          </button>
+        </div>
+        <div className="space-y-1">
+          <Link href="/" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
+            Anasayfa
+          </Link>
+          {categories.map((c) => (
+            <Link
+              key={c.slug}
+              href={`/kategori/${c.slug}`}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50"
+            >
+              <span>{c.emoji}</span> {c.name}
+            </Link>
+          ))}
+          <Link href="/hakkimizda" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
+            Hakkımızda
+          </Link>
+          <Link href="/iletisim" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
+            İletişim
+          </Link>
+        </div>
+      </nav>
+    </div>
+  ) : null;
 
   return (
     <>
@@ -23,41 +73,7 @@ export function MobileNav({ categories }: { categories: NavCat[] }) {
         <Menu size={24} />
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <nav className="absolute left-0 top-0 h-full w-72 max-w-[80%] bg-cream p-5 shadow-2xl">
-            <div className="mb-6 flex items-center justify-between">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="SÜT-HÜM" className="h-11 w-auto" />
-              <button onClick={() => setOpen(false)} className="rounded-full p-1.5 text-ink/60 hover:bg-green-50">
-                <X size={22} />
-              </button>
-            </div>
-            <div className="space-y-1">
-              <Link href="/" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
-                Anasayfa
-              </Link>
-              {categories.map((c) => (
-                <Link
-                  key={c.slug}
-                  href={`/kategori/${c.slug}`}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50"
-                >
-                  <span>{c.emoji}</span> {c.name}
-                </Link>
-              ))}
-              <Link href="/hakkimizda" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
-                Hakkımızda
-              </Link>
-              <Link href="/iletisim" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
-                İletişim
-              </Link>
-            </div>
-          </nav>
-        </div>
-      )}
+      {mounted && overlay ? createPortal(overlay, document.body) : null}
     </>
   );
 }
