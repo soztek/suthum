@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { toProductDTO } from "@/lib/serialize";
 import { ProductCard } from "@/components/ProductCard";
+import { Reviews } from "@/components/Reviews";
 
 export default async function HomePage() {
   const [settings, categories, featured, packages] = await Promise.all([
@@ -129,6 +130,9 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* MÜŞTERİ YORUMLARI */}
+      <Reviews />
 
       {/* HİKAYE */}
       <section className="bg-gradient-to-br from-green-700 to-green-800 py-16 text-white">
