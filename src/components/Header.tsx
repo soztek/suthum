@@ -52,12 +52,7 @@ export async function Header() {
             Anasayfa
           </Link>
 
-          {/* Ortada arama alanı (masaüstü) */}
-          <div className="hidden flex-1 justify-center px-2 lg:flex">
-            <SearchBar className="w-full max-w-md" />
-          </div>
-
-          <div className="ml-auto flex items-center gap-2 sm:gap-3 lg:ml-0">
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <a href={`tel:${settings.phone.replace(/\s/g, "")}`} className="hidden items-center gap-2 rounded-full border border-green-200 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-50 md:flex">
               <Phone size={16} /> {settings.phone}
             </a>
@@ -72,9 +67,11 @@ export async function Header() {
           </div>
         </div>
 
-        {/* Mobil arama satırı */}
-        <div className="border-t border-green-100 px-4 py-2.5 lg:hidden">
-          <SearchBar />
+        {/* Arama satırı (tüm ekranlar) */}
+        <div className="border-t border-green-100 px-4 py-2.5">
+          <div className="mx-auto max-w-3xl">
+            <SearchBar />
+          </div>
         </div>
 
         {/* Kategori menüsü — ikonlu çubuk (masaüstü) */}

@@ -4,7 +4,6 @@ import { Search } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { toProductDTO } from "@/lib/serialize";
 import { ProductCard } from "@/components/ProductCard";
-import { SearchBar } from "@/components/SearchBar";
 
 export const metadata: Metadata = { title: "Arama" };
 export const dynamic = "force-dynamic";
@@ -40,10 +39,6 @@ export default async function SearchPage({
         <span>/</span>
         <span className="font-medium text-ink">Arama</span>
       </nav>
-
-      <div className="mx-auto mb-8 max-w-xl">
-        <SearchBar />
-      </div>
 
       {!term ? (
         <p className="text-center text-ink/50">Aramak istediğin ürünü yaz.</p>
