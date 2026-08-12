@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/user-auth";
 import { CartButton } from "./cart/CartButton";
 import { MobileNav } from "./MobileNav";
 import { CategoryIcon } from "./CategoryIcon";
+import { SearchBar } from "./SearchBar";
 
 export async function Header() {
   const [settings, categories, user] = await Promise.all([
@@ -46,12 +47,15 @@ export async function Header() {
             <img src="/logo.png" alt="SÜT-HÜM Süt Ürünleri" className="h-12 w-auto sm:h-14" />
           </Link>
 
-          {/* Orta menü — logo ile aksiyonların ortasında (masaüstü) */}
-          <nav className="hidden flex-1 items-center justify-center gap-9 lg:flex">
-            <Link href="/" className="text-[15px] font-semibold text-ink transition hover:text-green-700">Anasayfa</Link>
-            <Link href="/hakkimizda" className="text-[15px] font-semibold text-ink transition hover:text-green-700">Hakkımızda</Link>
-            <Link href="/iletisim" className="text-[15px] font-semibold text-ink transition hover:text-green-700">İletişim</Link>
-          </nav>
+          {/* Anasayfa — logonun yanında */}
+          <Link href="/" className="hidden shrink-0 text-[15px] font-semibold text-ink transition hover:text-green-700 lg:block">
+            Anasayfa
+          </Link>
+
+          {/* Ortada arama alanı (masaüstü) */}
+          <div className="hidden flex-1 justify-center px-2 lg:flex">
+            <SearchBar className="w-full max-w-md" />
+          </div>
 
           <div className="ml-auto flex items-center gap-2 sm:gap-3 lg:ml-0">
             <a href={`tel:${settings.phone.replace(/\s/g, "")}`} className="hidden items-center gap-2 rounded-full border border-green-200 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-50 md:flex">
@@ -66,6 +70,11 @@ export async function Header() {
             </Link>
             <CartButton />
           </div>
+        </div>
+
+        {/* Mobil arama satırı */}
+        <div className="border-t border-green-100 px-4 py-2.5 lg:hidden">
+          <SearchBar />
         </div>
 
         {/* Kategori menüsü — ikonlu çubuk (masaüstü) */}
