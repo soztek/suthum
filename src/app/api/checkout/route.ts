@@ -6,6 +6,7 @@ import { getSettings } from "@/lib/settings";
 import { orderNo, toNumber } from "@/lib/utils";
 import { isPaymentLive, initCheckoutForm } from "@/lib/iyzico";
 import { getCurrentUser } from "@/lib/user-auth";
+import { sendOrderEmails } from "@/lib/email";
 
 const schema = z.object({
   customer: z.object({
@@ -104,6 +105,7 @@ export async function POST(req: Request) {
       where: { id: order.id },
       data: { paymentStatus: "PAID", status: "PREPARING" },
     });
+    await sendOrderEmails(order.id);
     return NextResponse.json({ mode: "demo", orderNo: order.orderNo });
   }
 

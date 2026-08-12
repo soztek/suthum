@@ -2,6 +2,7 @@ import { Plus, Save } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { saveCategory, deleteCategory } from "@/lib/admin-actions";
 import { DeleteButton } from "@/components/admin/DeleteButton";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const dynamic = "force-dynamic";
 
@@ -16,34 +17,40 @@ export default async function AdminCategories() {
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="text-2xl font-extrabold text-ink">Kategoriler</h1>
+      <p className="mt-1 text-sm text-ink/50">Her kategoriye özel fotoğraf ekleyebilirsin — sitede kategori kartlarında görünür.</p>
 
       {/* Yeni kategori */}
-      <form action={saveCategory} className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-green-100 bg-white p-5">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-ink/60">Emoji</label>
-          <input name="emoji" className={`${inputCls} w-16 text-center`} placeholder="🧀" maxLength={4} />
+      <form action={saveCategory} className="mt-6 space-y-4 rounded-2xl border border-green-100 bg-white p-5">
+        <p className="text-sm font-bold text-green-700">Yeni Kategori Ekle</p>
+        <ImageUpload name="imageUrl" label="Kategori Görseli" compact />
+        <div className="flex flex-wrap items-end gap-3">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-ink/60">Emoji</label>
+            <input name="emoji" className={`${inputCls} w-16 text-center`} placeholder="🧀" maxLength={4} />
+          </div>
+          <div className="flex-1">
+            <label className="mb-1 block text-xs font-medium text-ink/60">Kategori Adı</label>
+            <input name="name" required className={`${inputCls} w-full`} placeholder="Yeni kategori adı" />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-ink/60">Sıra</label>
+            <input name="order" type="number" defaultValue={categories.length} className={`${inputCls} w-20`} />
+          </div>
+          <button className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600">
+            <Plus size={16} /> Ekle
+          </button>
         </div>
-        <div className="flex-1">
-          <label className="mb-1 block text-xs font-medium text-ink/60">Kategori Adı</label>
-          <input name="name" required className={`${inputCls} w-full`} placeholder="Yeni kategori adı" />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-ink/60">Sıra</label>
-          <input name="order" type="number" defaultValue={categories.length} className={`${inputCls} w-20`} />
-        </div>
-        <button className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600">
-          <Plus size={16} /> Ekle
-        </button>
       </form>
 
       {/* Mevcut kategoriler */}
       <div className="mt-4 space-y-2">
         {categories.map((c) => (
           <div key={c.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-green-100 bg-white p-3">
-            <form action={saveCategory} className="flex flex-1 flex-wrap items-center gap-2">
+            <form action={saveCategory} className="flex flex-1 flex-wrap items-center gap-3">
               <input type="hidden" name="id" value={c.id} />
+              <ImageUpload name="imageUrl" defaultValue={c.imageUrl ?? ""} compact />
               <input name="emoji" defaultValue={c.emoji ?? ""} className={`${inputCls} w-14 text-center`} maxLength={4} />
-              <input name="name" defaultValue={c.name} className={`${inputCls} min-w-40 flex-1`} />
+              <input name="name" defaultValue={c.name} className={`${inputCls} min-w-36 flex-1`} />
               <input name="order" type="number" defaultValue={c.order} className={`${inputCls} w-16`} />
               <span className="text-xs text-ink/40">{c._count.products} ürün</span>
               <button className="inline-flex items-center gap-1.5 rounded-lg border border-green-200 px-3 py-2 text-sm font-semibold text-green-700 hover:bg-green-50">

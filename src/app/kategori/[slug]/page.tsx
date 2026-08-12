@@ -52,7 +52,12 @@ export default async function CategoryPage({
       </nav>
 
       <div className="mb-8 flex items-center gap-4 rounded-3xl bg-gradient-to-r from-green-600 to-green-700 p-8 text-white">
-        <span className="text-5xl">{category.emoji}</span>
+        {category.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={category.imageUrl} alt={category.name} className="h-20 w-20 shrink-0 rounded-2xl object-cover ring-2 ring-white/40" />
+        ) : (
+          <span className="text-5xl">{category.emoji}</span>
+        )}
         <div>
           <h1 className="text-3xl font-extrabold">{category.name}</h1>
           <p className="mt-1 text-green-50/90">{category.products.length} doğal ürün</p>

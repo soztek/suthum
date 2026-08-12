@@ -99,15 +99,16 @@ export async function saveCategory(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
   if (!name) throw new Error("Kategori adı zorunlu");
   const emoji = String(formData.get("emoji") || "") || null;
+  const imageUrl = String(formData.get("imageUrl") || "") || null;
   const order = Number(formData.get("order") || 0);
 
   if (id) {
-    await prisma.category.update({ where: { id }, data: { name, emoji, order } });
+    await prisma.category.update({ where: { id }, data: { name, emoji, imageUrl, order } });
   } else {
     let slug = slugify(name);
     let n = 1;
     while (await prisma.category.findUnique({ where: { slug } })) slug = `${slugify(name)}-${++n}`;
-    await prisma.category.create({ data: { name, slug, emoji, order } });
+    await prisma.category.create({ data: { name, slug, emoji, imageUrl, order } });
   }
   revalidatePath("/admin/kategoriler");
   revalidatePath("/");

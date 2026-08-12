@@ -3,7 +3,17 @@
 import { useState, useRef } from "react";
 import { Upload, X, Loader2, ImageIcon } from "lucide-react";
 
-export function ImageUpload({ name, defaultValue = "" }: { name: string; defaultValue?: string }) {
+export function ImageUpload({
+  name,
+  defaultValue = "",
+  label = "Ürün Görseli",
+  compact = false,
+}: {
+  name: string;
+  defaultValue?: string;
+  label?: string;
+  compact?: boolean;
+}) {
   const [url, setUrl] = useState(defaultValue);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,30 +44,32 @@ export function ImageUpload({ name, defaultValue = "" }: { name: string; default
     }
   }
 
+  const box = compact ? "h-16 w-16" : "h-28 w-28";
+
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium text-ink/70">Ürün Görseli</label>
+      {!compact && <label className="mb-2 block text-sm font-medium text-ink/70">{label}</label>}
       <input type="hidden" name={name} value={url} />
-      <div className="flex items-center gap-4">
-        <div className="relative grid h-28 w-28 shrink-0 place-items-center overflow-hidden rounded-xl border border-green-200 bg-green-50">
+      <div className="flex items-center gap-3">
+        <div className={`relative grid ${box} shrink-0 place-items-center overflow-hidden rounded-xl border border-green-200 bg-green-50`}>
           {url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={url} alt="Önizleme" className="h-full w-full object-cover" />
           ) : (
-            <ImageIcon size={28} className="text-green-300" />
+            <ImageIcon size={compact ? 20 : 28} className="text-green-300" />
           )}
           {url && (
-            <button type="button" onClick={() => setUrl("")} className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-ink/60 text-white hover:bg-ink" aria-label="Kaldır">
-              <X size={13} />
+            <button type="button" onClick={() => setUrl("")} className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-ink/60 text-white hover:bg-ink" aria-label="Kaldır">
+              <X size={12} />
             </button>
           )}
         </div>
         <div>
-          <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-2 rounded-full border border-green-300 px-5 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 disabled:opacity-60">
+          <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-2 rounded-full border border-green-300 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-50 disabled:opacity-60">
             {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-            {uploading ? "Yükleniyor..." : url ? "Görseli Değiştir" : "Görsel Yükle"}
+            {uploading ? "Yükleniyor..." : url ? "Değiştir" : "Görsel Yükle"}
           </button>
-          <p className="mt-2 text-xs text-ink/50">JPEG / PNG / WebP · en fazla 5MB</p>
+          {!compact && <p className="mt-2 text-xs text-ink/50">JPEG / PNG / WebP · en fazla 5MB</p>}
           {error && <p className="mt-1 text-xs text-orange-600">{error}</p>}
         </div>
       </div>

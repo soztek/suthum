@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { retrieveCheckout } from "@/lib/iyzico";
+import { sendOrderEmails } from "@/lib/email";
 
 export async function POST(req: Request) {
   const base = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin;
@@ -23,6 +24,7 @@ export async function POST(req: Request) {
         where: { id: order.id },
         data: { paymentStatus: "PAID", status: "PREPARING", iyziPaymentId: res.paymentId ?? null },
       });
+      await sendOrderEmails(order.id);
       return NextResponse.redirect(`${base}/odeme/sonuc?status=success&order=${order.orderNo}`, 303);
     }
     await prisma.order.update({
