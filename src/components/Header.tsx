@@ -13,7 +13,7 @@ export async function Header() {
     prisma.category.findMany({
       where: { isActive: true },
       orderBy: { order: "asc" },
-      select: { name: true, slug: true, emoji: true },
+      select: { name: true, slug: true, emoji: true, imageUrl: true },
     }),
     getCurrentUser(),
   ]);
@@ -88,7 +88,12 @@ export async function Header() {
                 href={`/kategori/${c.slug}`}
                 className="group flex flex-1 flex-col items-center gap-2 border-l-2 border-green-200/70 px-3 py-4 transition first:border-l-0 hover:bg-green-50/70"
               >
-                <CategoryIcon slug={c.slug} className="h-8 w-8 text-ink/70 transition group-hover:text-green-600" />
+                {c.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={c.imageUrl} alt={c.name} className="h-9 w-9 rounded-full object-cover ring-1 ring-green-100 transition group-hover:scale-110" />
+                ) : (
+                  <CategoryIcon slug={c.slug} className="h-8 w-8 text-ink/70 transition group-hover:text-green-600" />
+                )}
                 <span className="text-center text-sm font-semibold text-ink group-hover:text-green-700">{c.name}</span>
               </Link>
             ))}

@@ -78,7 +78,13 @@ export default async function CategoryPage({
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <span>{c.emoji}</span> {c.name}
+                  {c.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={c.imageUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                  ) : (
+                    <span>{c.emoji}</span>
+                  )}
+                  {c.name}
                 </span>
                 <span className={c.slug === slug ? "text-green-100" : "text-ink/40"}>{c._count.products}</span>
               </Link>

@@ -1,4 +1,4 @@
-import { Plus, Save } from "lucide-react";
+import { Plus, Save, CheckCircle2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { saveCategory, deleteCategory } from "@/lib/admin-actions";
 import { DeleteButton } from "@/components/admin/DeleteButton";
@@ -6,7 +6,12 @@ import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminCategories() {
+export default async function AdminCategories({
+  searchParams,
+}: {
+  searchParams: Promise<{ ok?: string }>;
+}) {
+  const { ok } = await searchParams;
   const categories = await prisma.category.findMany({
     orderBy: { order: "asc" },
     include: { _count: { select: { products: true } } },
@@ -17,7 +22,13 @@ export default async function AdminCategories() {
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="text-2xl font-extrabold text-ink">Kategoriler</h1>
-      <p className="mt-1 text-sm text-ink/50">Her kategoriye özel fotoğraf ekleyebilirsin — sitede kategori kartlarında görünür.</p>
+      <p className="mt-1 text-sm text-ink/50">Her kategoriye özel fotoğraf ekleyebilirsin — menüde, kartlarda ve kategori sayfasında görünür.</p>
+
+      {ok && (
+        <div className="mt-4 flex items-center gap-2 rounded-xl bg-green-100 px-4 py-3 text-sm font-medium text-green-700">
+          <CheckCircle2 size={18} /> Kaydedildi.
+        </div>
+      )}
 
       {/* Yeni kategori */}
       <form action={saveCategory} className="mt-6 space-y-4 rounded-2xl border border-green-100 bg-white p-5">

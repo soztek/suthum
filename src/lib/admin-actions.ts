@@ -112,6 +112,7 @@ export async function saveCategory(formData: FormData) {
   }
   revalidatePath("/admin/kategoriler");
   revalidatePath("/");
+  redirect("/admin/kategoriler?ok=1");
 }
 
 export async function deleteCategory(formData: FormData) {
