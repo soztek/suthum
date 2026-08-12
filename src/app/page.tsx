@@ -61,14 +61,15 @@ export default async function HomePage() {
           <div className="relative mt-2 lg:mt-0">
             <div className="grid grid-cols-2 gap-4">
               {[
-                { img: "/hero/kasar.jpg", t: "Eski Kaşar" },
-                { img: "/hero/bal.jpg", t: "Kara Kovan Balı" },
-                { img: "/hero/sut.jpg", t: "Süt & Tereyağı" },
-                { img: "/hero/yoresel.jpg", t: "Yöresel Ürünler" },
+                { img: "/hero/kasar.jpg", t: "Eski Kaşar", href: "/kategori/peynir-cesitleri" },
+                { img: "/hero/bal.jpg", t: "Kara Kovan Balı", href: "/kategori/bal-cesitleri" },
+                { img: "/hero/sut.jpg", t: "Süt & Tereyağı", href: "/kategori/sut-tereyagi" },
+                { img: "/hero/yoresel.jpg", t: "Yöresel Ürünler", href: "/kategori/yoresel-urunler" },
               ].map((x, i) => (
-                <div
+                <Link
                   key={i}
-                  className="group relative aspect-square overflow-hidden rounded-3xl shadow-xl ring-1 ring-white/25"
+                  href={x.href}
+                  className="group relative block aspect-square overflow-hidden rounded-3xl shadow-xl ring-1 ring-white/25"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -78,7 +79,7 @@ export default async function HomePage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
                   <span className="absolute inset-x-3 bottom-3 font-bold text-white drop-shadow-lg">{x.t}</span>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
