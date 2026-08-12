@@ -64,7 +64,7 @@ export default async function HomePage() {
                 { img: "/hero/kasar.jpg", t: "Eski Kaşar" },
                 { img: "/hero/bal.jpg", t: "Kara Kovan Balı" },
                 { img: "/hero/sut.jpg", t: "Süt & Tereyağı" },
-                { img: "/hero/kavurma.jpg", t: "Dana Kavurma" },
+                { img: "/hero/yoresel.jpg", t: "Yöresel Ürünler" },
               ].map((x, i) => (
                 <div
                   key={i}
