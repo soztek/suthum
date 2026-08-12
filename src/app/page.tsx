@@ -58,7 +58,7 @@ export default async function HomePage() {
           </div>
 
           {/* Görsel kolaj */}
-          <div className="relative hidden lg:block">
+          <div className="relative mt-2 lg:mt-0">
             <div className="grid grid-cols-2 gap-4">
               {[
                 { img: "/hero/kasar.jpg", t: "Eski Kaşar" },
