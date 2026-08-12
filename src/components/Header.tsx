@@ -90,9 +90,9 @@ export async function Header() {
               >
                 {c.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={c.imageUrl} alt={c.name} className="h-14 w-14 rounded-full object-cover ring-2 ring-green-100 transition group-hover:scale-110" />
+                  <img src={c.imageUrl} alt={c.name} className="h-20 w-20 rounded-full object-cover ring-2 ring-green-100 transition group-hover:scale-110" />
                 ) : (
-                  <CategoryIcon slug={c.slug} className="h-11 w-11 text-ink/70 transition group-hover:text-green-600" />
+                  <CategoryIcon slug={c.slug} className="h-14 w-14 text-ink/70 transition group-hover:text-green-600" />
                 )}
                 <span className="text-center text-sm font-semibold text-ink group-hover:text-green-700">{c.name}</span>
               </Link>

@@ -97,12 +97,12 @@ export default async function HomePage() {
               className="group flex flex-col items-center gap-3 rounded-2xl border border-green-100 bg-white p-5 text-center card-shadow hover-lift"
             >
               {c.imageUrl ? (
-                <span className="h-16 w-16 overflow-hidden rounded-full ring-1 ring-green-100 transition group-hover:scale-110">
+                <span className="h-24 w-24 overflow-hidden rounded-full ring-2 ring-green-100 transition group-hover:scale-110">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={c.imageUrl} alt={c.name} className="h-full w-full object-cover" />
                 </span>
               ) : (
-                <span className="grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-green-50 to-orange-50 text-3xl transition group-hover:scale-110">
+                <span className="grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-green-50 to-orange-50 text-4xl transition group-hover:scale-110">
                   {c.emoji}
                 </span>
               )}
