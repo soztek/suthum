@@ -52,7 +52,12 @@ export async function Header() {
             Anasayfa
           </Link>
 
-          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          {/* Arama — Anasayfa ile telefon arasında (masaüstü) */}
+          <div className="hidden flex-1 justify-center px-3 lg:flex">
+            <SearchBar className="w-full max-w-xl" />
+          </div>
+
+          <div className="ml-auto flex items-center gap-2 sm:gap-3 lg:ml-0">
             <a href={`tel:${settings.phone.replace(/\s/g, "")}`} className="hidden items-center gap-2 rounded-full border border-green-200 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-50 md:flex">
               <Phone size={16} /> {settings.phone}
             </a>
@@ -67,8 +72,8 @@ export async function Header() {
           </div>
         </div>
 
-        {/* Arama satırı (tüm ekranlar) */}
-        <div className="border-t border-green-100 px-4 py-2.5">
+        {/* Arama satırı (yalnız mobil) */}
+        <div className="border-t border-green-100 px-4 py-2.5 lg:hidden">
           <div className="mx-auto max-w-3xl">
             <SearchBar />
           </div>
