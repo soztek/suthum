@@ -1,9 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { toProductDTO } from "@/lib/serialize";
 import { ProductCard } from "@/components/ProductCard";
+import { SortDropdown } from "@/components/SortDropdown";
+
+function orderByFor(sirala?: string): Prisma.ProductOrderByWithRelationInput[] {
+  switch (sirala) {
+    case "fiyat-artan": return [{ price: "asc" }];
+    case "fiyat-azalan": return [{ price: "desc" }];
+    case "isim": return [{ name: "asc" }];
+    case "yeni": return [{ createdAt: "desc" }];
+    default: return [{ isFeatured: "desc" }, { order: "asc" }];
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -17,10 +29,13 @@ export async function generateMetadata({
 
 export default async function CategoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ sirala?: string }>;
 }) {
   const { slug } = await params;
+  const { sirala } = await searchParams;
 
   const [category, allCategories] = await Promise.all([
     prisma.category.findUnique({
@@ -29,7 +44,7 @@ export default async function CategoryPage({
         products: {
           where: { isActive: true },
           include: { category: true },
-          orderBy: [{ isFeatured: "desc" }, { order: "asc" }],
+          orderBy: orderByFor(sirala),
         },
       },
     }),
@@ -94,6 +109,14 @@ export default async function CategoryPage({
 
         {/* Ürünler */}
         <div>
+          {/* Araç çubuğu: ürün sayısı + sıralama */}
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-green-100 bg-white px-4 py-2.5">
+            <span className="text-sm font-medium text-ink/70">
+              {category.products.length} ürün
+            </span>
+            <SortDropdown current={sirala} />
+          </div>
+
           {category.products.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-green-200 bg-white p-12 text-center text-ink/50">
               Bu kategoride henüz ürün yok.
