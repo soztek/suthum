@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { toNumber } from "@/lib/utils";
 import { saveProduct } from "@/lib/admin-actions";
-import { ImageUpload } from "@/components/admin/ImageUpload";
+import { MultiImageUpload } from "@/components/admin/MultiImageUpload";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +37,16 @@ export default async function ProductForm({
         {!isNew && <input type="hidden" name="id" value={product!.id} />}
 
         <div className="rounded-2xl border border-green-100 bg-white p-6">
-          <ImageUpload name="imageUrl" defaultValue={product?.imageUrl ?? ""} />
+          <MultiImageUpload
+            name="images"
+            defaultValue={
+              product
+                ? [product.imageUrl, ...(product.images ?? [])].filter(
+                    (v, i, a): v is string => Boolean(v) && a.indexOf(v) === i
+                  )
+                : []
+            }
+          />
         </div>
 
         <div className="space-y-4 rounded-2xl border border-green-100 bg-white p-6">

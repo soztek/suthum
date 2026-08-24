@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Star, Snowflake, Truck, ShieldCheck, Leaf } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { toProductDTO } from "@/lib/serialize";
-import { ProductImage } from "@/components/ProductImage";
+import { ProductGallery } from "@/components/ProductGallery";
 import { ProductCard } from "@/components/ProductCard";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { formatPrice, discountPercent } from "@/lib/utils";
@@ -61,19 +61,22 @@ export default async function ProductPage({
       </nav>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Görsel */}
-        <div className="relative">
-          <ProductImage
-            src={dto.imageUrl}
+        {/* Görsel galerisi */}
+        <div>
+          <ProductGallery
+            images={[dto.imageUrl, ...dto.images].filter(
+              (v, i, a): v is string => Boolean(v) && a.indexOf(v) === i
+            )}
             alt={dto.name}
             emoji={dto.categoryEmoji}
-            className="aspect-square rounded-3xl border border-green-100"
+            badge={
+              discount ? (
+                <span className="absolute left-4 top-4 rounded-full bg-orange-500 px-3 py-1.5 text-sm font-bold text-white shadow">
+                  %{discount} İndirim
+                </span>
+              ) : null
+            }
           />
-          {discount && (
-            <span className="absolute left-4 top-4 rounded-full bg-orange-500 px-3 py-1.5 text-sm font-bold text-white shadow">
-              %{discount} İndirim
-            </span>
-          )}
         </div>
 
         {/* Bilgi */}

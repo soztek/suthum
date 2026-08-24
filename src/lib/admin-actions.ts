@@ -44,13 +44,23 @@ export async function saveProduct(formData: FormData) {
   const baseSlug = slugify(name);
   const price = dec(formData.get("price")) ?? new Prisma.Decimal(0);
 
+  // Çoklu görsel: JSON dizisi. İlk görsel kapak (imageUrl) olur.
+  let images: string[] = [];
+  try {
+    const parsed = JSON.parse(String(formData.get("images") || "[]"));
+    if (Array.isArray(parsed)) images = parsed.filter((x): x is string => typeof x === "string" && x.length > 0);
+  } catch {
+    images = [];
+  }
+
   const data = {
     name,
     description: String(formData.get("description") || "") || null,
     price,
     compareAt: dec(formData.get("compareAt")),
     unit: String(formData.get("unit") || "") || null,
-    imageUrl: String(formData.get("imageUrl") || "") || null,
+    imageUrl: images[0] ?? null,
+    images,
     stock: Number(formData.get("stock") || 100),
     isActive: formData.get("isActive") === "on",
     isFeatured: formData.get("isFeatured") === "on",
