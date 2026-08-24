@@ -47,9 +47,12 @@ export async function Header() {
             <img src="/logo.png" alt="SÜT-HÜM Süt Ürünleri" className="h-12 w-auto sm:h-14" />
           </Link>
 
-          {/* Anasayfa — logonun yanında */}
+          {/* Anasayfa + Tüm Ürünler — logonun yanında */}
           <Link href="/" className="hidden shrink-0 text-[15px] font-semibold text-ink transition hover:text-green-700 lg:block">
             Anasayfa
+          </Link>
+          <Link href="/urunler" className="hidden shrink-0 text-[15px] font-semibold text-ink transition hover:text-green-700 lg:block">
+            Tüm Ürünler
           </Link>
 
           {/* Arama — Anasayfa ile telefon arasında (masaüstü) */}

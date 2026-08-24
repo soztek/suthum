@@ -49,6 +49,9 @@ export function MobileNav({
           <Link href="/" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
             Anasayfa
           </Link>
+          <Link href="/urunler" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
+            Tüm Ürünler
+          </Link>
           {categories.map((c) => (
             <Link
               key={c.slug}

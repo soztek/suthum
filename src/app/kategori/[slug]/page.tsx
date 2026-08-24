@@ -1,21 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { toProductDTO } from "@/lib/serialize";
-import { ProductCard } from "@/components/ProductCard";
+import { orderByFor } from "@/lib/sort";
+import { ProductList } from "@/components/ProductList";
 import { SortDropdown } from "@/components/SortDropdown";
-
-function orderByFor(sirala?: string): Prisma.ProductOrderByWithRelationInput[] {
-  switch (sirala) {
-    case "fiyat-artan": return [{ price: "asc" }];
-    case "fiyat-azalan": return [{ price: "desc" }];
-    case "isim": return [{ name: "asc" }];
-    case "yeni": return [{ createdAt: "desc" }];
-    default: return [{ isFeatured: "desc" }, { order: "asc" }];
-  }
-}
+import { ViewToggle } from "@/components/ViewToggle";
 
 export async function generateMetadata({
   params,
@@ -32,10 +23,10 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ sirala?: string }>;
+  searchParams: Promise<{ sirala?: string; gorunum?: string }>;
 }) {
   const { slug } = await params;
-  const { sirala } = await searchParams;
+  const { sirala, gorunum } = await searchParams;
 
   const [category, allCategories] = await Promise.all([
     prisma.category.findUnique({
@@ -109,11 +100,12 @@ export default async function CategoryPage({
 
         {/* Ürünler */}
         <div>
-          {/* Araç çubuğu: ürün sayısı + sıralama */}
+          {/* Araç çubuğu: görünüm + ürün sayısı + sıralama */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-green-100 bg-white px-4 py-2.5">
-            <span className="text-sm font-medium text-ink/70">
-              {category.products.length} ürün
-            </span>
+            <div className="flex items-center gap-3">
+              <ViewToggle current={gorunum} />
+              <span className="text-sm font-medium text-ink/70">{category.products.length} ürün</span>
+            </div>
             <SortDropdown current={sirala} />
           </div>
 
@@ -122,11 +114,7 @@ export default async function CategoryPage({
               Bu kategoride henüz ürün yok.
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {category.products.map((p) => (
-                <ProductCard key={p.id} product={toProductDTO(p)} />
-              ))}
-            </div>
+            <ProductList products={category.products.map(toProductDTO)} view={gorunum} />
           )}
         </div>
       </div>
