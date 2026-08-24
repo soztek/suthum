@@ -61,13 +61,31 @@ export async function Header() {
             <a href={`tel:${settings.phone.replace(/\s/g, "")}`} className="hidden items-center gap-2 rounded-full border border-green-200 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-50 md:flex">
               <Phone size={16} /> {settings.phone}
             </a>
-            <Link
-              href={user ? "/hesabim" : "/giris"}
-              className="hidden items-center gap-2 rounded-full border border-green-200 px-4 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 sm:flex"
-            >
-              <User size={16} />
-              <span className="hidden lg:inline">{user ? user.name.split(" ")[0] : "Giriş"}</span>
-            </Link>
+            {user ? (
+              <Link
+                href="/hesabim"
+                className="hidden items-center gap-2 rounded-full border border-green-200 px-4 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 sm:flex"
+              >
+                <User size={16} />
+                <span className="hidden lg:inline">{user.name.split(" ")[0]}</span>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/giris"
+                  className="hidden items-center gap-2 rounded-full border border-green-200 px-4 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 sm:flex"
+                >
+                  <User size={16} />
+                  <span className="hidden lg:inline">Giriş</span>
+                </Link>
+                <Link
+                  href="/kayit"
+                  className="hidden items-center rounded-full bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-600 sm:flex"
+                >
+                  Üye Ol
+                </Link>
+              </>
+            )}
             <CartButton />
           </div>
         </div>
