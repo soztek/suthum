@@ -110,7 +110,15 @@ export async function POST(req: Request) {
   }
 
   // --- GERÇEK ÖDEME: PayTR iFrame ---
-  const base = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin;
+  // Adresi güvenli belirle: env yalnızca geçerli https ise kullan, aksi halde istek host'undan al.
+  const envBase = process.env.NEXT_PUBLIC_BASE_URL;
+  const hostHdr = req.headers.get("host");
+  const base =
+    envBase && envBase.startsWith("https://")
+      ? envBase.replace(/\/$/, "")
+      : hostHdr
+        ? `https://${hostHdr}`
+        : new URL(req.url).origin;
   const xff = req.headers.get("x-forwarded-for");
   const ip = (xff ? xff.split(",")[0].trim() : "") || "85.34.78.112";
   // PayTR merchant_oid yalnız harf+rakam olmalı; sipariş no'dan üretilir ve orderda saklanır.
