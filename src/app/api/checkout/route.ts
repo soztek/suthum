@@ -21,6 +21,7 @@ const schema = z.object({
   items: z
     .array(z.object({ productId: z.string(), qty: z.number().int().positive() }))
     .min(1, "Sepet boş"),
+  paymentMethod: z.enum(["card", "havale"]).optional(),
 });
 
 export async function POST(req: Request) {
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
     );
   }
   const { customer, items } = parsed.data;
+  const payMethod = parsed.data.paymentMethod ?? "card";
 
   // Ürünleri veritabanından oku — fiyatlara SUNUCUDA karar verilir.
   const products = await prisma.product.findMany({
@@ -83,6 +85,7 @@ export async function POST(req: Request) {
       district: customer.district || null,
       note: customer.note || null,
       userId: currentUser?.id ?? null,
+      paymentMethod: payMethod,
       subtotal: new Prisma.Decimal(subtotal.toFixed(2)),
       shipping: new Prisma.Decimal(shipping.toFixed(2)),
       total: new Prisma.Decimal(total.toFixed(2)),
@@ -98,6 +101,12 @@ export async function POST(req: Request) {
       },
     },
   });
+
+  // --- HAVALE / EFT: kart çekilmez, sipariş "ödeme bekliyor" olarak oluşur ---
+  if (payMethod === "havale") {
+    await sendOrderEmails(order.id);
+    return NextResponse.json({ mode: "havale", orderNo: order.orderNo });
+  }
 
   // --- DEMO MOD: PayTR anahtarı yoksa ödeme simüle edilir ---
   if (!isPaytrLive()) {

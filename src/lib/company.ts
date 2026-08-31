@@ -12,3 +12,13 @@ export const COMPANY = {
   activity: "Süt ve Süt Ürünleri Perakende Ticareti",
   mersis: "", // varsa MERSİS no
 } as const;
+
+/**
+ * Havale / EFT ödemesi için banka hesap bilgileri.
+ * Müşteri ödeme sayfasında ve sipariş mailinde gösterilir.
+ */
+export const BANK = {
+  accountName: "ONUR IŞIK",
+  bankName: "Halkbank", // banka adı — yanlışsa güncelle
+  iban: "TR93 0001 2001 5260 0009 1008 41",
+} as const;

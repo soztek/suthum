@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
+import { Landmark } from "lucide-react";
 import { OrderStatusBadge } from "@/components/admin/OrderStatusBadge";
-import { updateOrderStatus } from "@/lib/admin-actions";
+import { updateOrderStatus, markOrderPaid } from "@/lib/admin-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,11 @@ export default async function AdminOrders() {
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${o.user ? "bg-green-600 text-white" : "bg-ink/10 text-ink/50"}`}>
                       {o.user ? "Üye" : "Misafir"}
                     </span>
+                    {o.paymentMethod === "havale" && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                        <Landmark size={11} /> Havale
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1 text-sm text-ink/50">
                     {new Date(o.createdAt).toLocaleString("tr-TR")}
@@ -72,18 +78,28 @@ export default async function AdminOrders() {
                 </div>
               </div>
 
-              <form action={updateOrderStatus} className="flex flex-wrap items-center gap-2 border-t border-green-50 pt-4">
-                <input type="hidden" name="id" value={o.id} />
-                <label className="text-sm font-medium text-ink/60">Durum:</label>
-                <select name="status" defaultValue={o.status} className="rounded-lg border border-green-200 bg-white px-3 py-2 text-sm outline-none focus:border-green-500">
-                  {STATUSES.map((s) => (
-                    <option key={s} value={s}>{LABELS[s]}</option>
-                  ))}
-                </select>
-                <button className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700">
-                  Güncelle
-                </button>
-              </form>
+              <div className="flex flex-wrap items-center gap-3 border-t border-green-50 pt-4">
+                <form action={updateOrderStatus} className="flex flex-wrap items-center gap-2">
+                  <input type="hidden" name="id" value={o.id} />
+                  <label className="text-sm font-medium text-ink/60">Durum:</label>
+                  <select name="status" defaultValue={o.status} className="rounded-lg border border-green-200 bg-white px-3 py-2 text-sm outline-none focus:border-green-500">
+                    {STATUSES.map((s) => (
+                      <option key={s} value={s}>{LABELS[s]}</option>
+                    ))}
+                  </select>
+                  <button className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700">
+                    Güncelle
+                  </button>
+                </form>
+                {o.paymentStatus !== "PAID" && (
+                  <form action={markOrderPaid}>
+                    <input type="hidden" name="id" value={o.id} />
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-green-300 bg-white px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-50">
+                      <Landmark size={15} /> Ödemeyi Onayla
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
           ))}
         </div>

@@ -50,6 +50,7 @@ model Order {
   orderNo       String        @unique
   status        OrderStatus   @default(PENDING)
   paymentStatus PaymentStatus @default(PENDING)
+  paymentMethod String        @default("card") // "card" (PayTR) | "havale" (Havale/EFT)
 
   fullName String
   email    String

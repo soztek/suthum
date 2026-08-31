@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, Truck, AlertCircle, Loader2 } from "lucide-react";
+import { Lock, Truck, AlertCircle, Loader2, CreditCard, Landmark } from "lucide-react";
 import { useCart } from "@/components/cart/CartProvider";
 import { ProductImage } from "@/components/ProductImage";
 import { formatPrice } from "@/lib/utils";
@@ -29,6 +29,7 @@ export function CheckoutForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [payMethod, setPayMethod] = useState<"card" | "havale">("card");
   const [form, setForm] = useState({
     fullName: initial?.fullName ?? "",
     email: initial?.email ?? "",
@@ -57,6 +58,7 @@ export function CheckoutForm({
         body: JSON.stringify({
           customer: form,
           items: items.map((i) => ({ productId: i.productId, qty: i.qty })),
+          paymentMethod: payMethod,
         }),
       });
       const data = await res.json();
@@ -67,6 +69,11 @@ export function CheckoutForm({
       }
       if (data.mode === "paytr" && data.token) {
         router.push(`/odeme/paytr?token=${encodeURIComponent(data.token)}`);
+        return;
+      }
+      if (data.mode === "havale") {
+        clear();
+        router.push(`/odeme/sonuc?status=havale&order=${data.orderNo}`);
         return;
       }
       // demo mod
@@ -130,6 +137,46 @@ export function CheckoutForm({
           </div>
         </div>
 
+        {paymentLive && (
+          <div className="rounded-2xl border border-green-100 bg-white p-6">
+            <h2 className="mb-4 text-lg font-bold text-ink">Ödeme Yöntemi</h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setPayMethod("card")}
+                className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition ${
+                  payMethod === "card" ? "border-green-500 bg-green-50/60" : "border-green-100 hover:border-green-300"
+                }`}
+              >
+                <CreditCard size={22} className={payMethod === "card" ? "text-green-600" : "text-ink/40"} />
+                <div>
+                  <p className="text-sm font-semibold text-ink">Kredi / Banka Kartı</p>
+                  <p className="text-xs text-ink/50">Güvenli online ödeme</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPayMethod("havale")}
+                className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition ${
+                  payMethod === "havale" ? "border-green-500 bg-green-50/60" : "border-green-100 hover:border-green-300"
+                }`}
+              >
+                <Landmark size={22} className={payMethod === "havale" ? "text-green-600" : "text-ink/40"} />
+                <div>
+                  <p className="text-sm font-semibold text-ink">Havale / EFT</p>
+                  <p className="text-xs text-ink/50">Banka hesabına transfer</p>
+                </div>
+              </button>
+            </div>
+            {payMethod === "havale" && (
+              <p className="mt-3 rounded-lg bg-orange-50 px-3 py-2.5 text-xs text-orange-800">
+                Siparişi oluşturduktan sonra IBAN ve sipariş numarası gösterilecek. Ödemeniz hesabımıza
+                geçtikten sonra siparişiniz hazırlanmaya başlar.
+              </p>
+            )}
+          </div>
+        )}
+
         {!paymentLive && (
           <div className="flex items-start gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-800">
             <AlertCircle size={20} className="mt-0.5 shrink-0" />
@@ -188,7 +235,13 @@ export function CheckoutForm({
           className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-orange-500 px-6 py-4 text-base font-semibold text-white shadow-lg transition hover:bg-orange-600 disabled:opacity-60"
         >
           {loading ? <Loader2 size={20} className="animate-spin" /> : <Lock size={18} />}
-          {loading ? "İşleniyor..." : paymentLive ? "Güvenli Ödemeye Geç" : "Siparişi Tamamla"}
+          {loading
+            ? "İşleniyor..."
+            : !paymentLive
+              ? "Siparişi Tamamla"
+              : payMethod === "havale"
+                ? "Siparişi Oluştur"
+                : "Güvenli Ödemeye Geç"}
         </button>
         <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-ink/50">
           <Lock size={12} /> 256-bit SSL ile güvenli ödeme

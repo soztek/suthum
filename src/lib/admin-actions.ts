@@ -183,6 +183,18 @@ export async function updateOrderStatus(formData: FormData) {
   revalidatePath("/admin/siparisler");
 }
 
+export async function markOrderPaid(formData: FormData) {
+  await guard();
+  const id = String(formData.get("id") || "");
+  if (id) {
+    await prisma.order.update({
+      where: { id },
+      data: { paymentStatus: "PAID", status: "PREPARING" },
+    });
+  }
+  revalidatePath("/admin/siparisler");
+}
+
 // --- Ayarlar ---
 export async function saveSettings(formData: FormData) {
   await guard();
