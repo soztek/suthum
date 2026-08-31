@@ -46,6 +46,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (hydrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items, hydrated]);
 
+  // Başka bir bağlamda (ör. PayTR ödeme iframe'i) sepet değişirse senkronize et.
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key === STORAGE_KEY) {
+        try {
+          setItems(e.newValue ? JSON.parse(e.newValue) : []);
+        } catch {
+          setItems([]);
+        }
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   const add = useCallback((line: Omit<CartLine, "qty">, qty = 1) => {
     setItems((prev) => {
       const idx = prev.findIndex((l) => l.productId === line.productId);
