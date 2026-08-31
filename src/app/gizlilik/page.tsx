@@ -23,10 +23,6 @@ export default function Page() {
         </p>
         <h2 className="pt-2 text-lg font-bold text-ink">Çerezler</h2>
         <p>Alışveriş deneyimini iyileştirmek için zorunlu çerezler kullanılır.</p>
-        <p className="pt-4 text-sm text-ink/50">
-          Not: Bu metin genel bilgilendirme amaçlıdır; yayına almadan önce işletmenize özel olarak
-          güncellenmesi önerilir.
-        </p>
       </div>
     </div>
   );
