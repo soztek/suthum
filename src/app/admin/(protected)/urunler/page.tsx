@@ -5,11 +5,27 @@ import { formatPrice } from "@/lib/utils";
 import { ProductImage } from "@/components/ProductImage";
 import { toggleProductActive, deleteProduct } from "@/lib/admin-actions";
 import { DeleteButton } from "@/components/admin/DeleteButton";
+import { AdminProductSearch } from "@/components/admin/AdminProductSearch";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminProducts() {
+export default async function AdminProducts({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const query = (q ?? "").trim();
+
   const products = await prisma.product.findMany({
+    where: query
+      ? {
+          OR: [
+            { name: { contains: query, mode: "insensitive" } },
+            { category: { name: { contains: query, mode: "insensitive" } } },
+          ],
+        }
+      : undefined,
     include: { category: true },
     orderBy: [{ category: { order: "asc" } }, { order: "asc" }],
   });
@@ -21,6 +37,10 @@ export default async function AdminProducts() {
         <Link href="/admin/urunler/yeni" className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600">
           <Plus size={17} /> Yeni Ürün
         </Link>
+      </div>
+
+      <div className="mt-5 max-w-md">
+        <AdminProductSearch />
       </div>
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-green-100 bg-white">
@@ -56,6 +76,11 @@ export default async function AdminProducts() {
               </div>
             </div>
           ))}
+          {products.length === 0 && (
+            <div className="px-5 py-12 text-center text-sm text-ink/50">
+              {query ? <>“{query}” için ürün bulunamadı.</> : "Henüz ürün yok."}
+            </div>
+          )}
         </div>
       </div>
     </div>
