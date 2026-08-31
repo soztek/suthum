@@ -50,7 +50,7 @@ export async function Footer() {
             <img src="/logo.png" alt="SÜT-HÜM Süt Ürünleri" className="h-24 w-auto" />
           </div>
           <p className="mt-3 text-sm text-green-200">{settings.tagline}</p>
-          <p className="mt-4 flex items-start gap-2 text-sm text-green-200">
+          <p className="mt-4 flex items-start gap-2 whitespace-pre-line text-sm text-green-200">
             <MapPin size={16} className="mt-0.5 shrink-0 text-orange-300" /> {settings.address}
           </p>
         </div>

@@ -35,7 +35,7 @@ export default async function ContactPage() {
 
       <div className="mt-4 flex items-start gap-4 rounded-2xl border border-green-100 bg-white p-6 card-shadow">
         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-green-50"><MapPin className="text-green-600" /></span>
-        <div><p className="text-sm text-ink/50">Adres</p><p className="font-semibold text-ink">{s.address}</p></div>
+        <div><p className="text-sm text-ink/50">Adres</p><p className="whitespace-pre-line font-semibold text-ink">{s.address}</p></div>
       </div>
     </div>
   );
