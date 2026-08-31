@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Phone, Mail, MapPin, AtSign, ShieldCheck, Truck, Leaf } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
+import { COMPANY } from "@/lib/company";
 
 export async function Footer() {
   const [settings, categories] = await Promise.all([
@@ -73,6 +74,8 @@ export async function Footer() {
             <li><Link href="/hakkimizda" className="hover:text-orange-300">Hakkımızda</Link></li>
             <li><Link href="/iletisim" className="hover:text-orange-300">İletişim</Link></li>
             <li><Link href="/mesafeli-satis" className="hover:text-orange-300">Mesafeli Satış Sözleşmesi</Link></li>
+            <li><Link href="/iade" className="hover:text-orange-300">İptal, İade ve Değişim</Link></li>
+            <li><Link href="/teslimat" className="hover:text-orange-300">Teslimat ve Kargo</Link></li>
             <li><Link href="/gizlilik" className="hover:text-orange-300">Gizlilik & KVKK</Link></li>
           </ul>
         </div>
@@ -92,8 +95,19 @@ export async function Footer() {
         </div>
       </div>
 
+      {/* Firma / yasal bilgiler */}
+      <div className="border-t border-green-700/60">
+        <div className="mx-auto max-w-7xl px-6 py-5 text-xs leading-relaxed text-green-300">
+          <p className="font-semibold text-green-100">{COMPANY.legalName}</p>
+          <p className="mt-1">
+            {COMPANY.taxOffice} · Vergi/TC No: {COMPANY.taxNo}
+            {" · "}Adres: {COMPANY.address}
+          </p>
+        </div>
+      </div>
+
       <div className="border-t border-green-700/60 py-5 text-center text-xs text-green-300">
-        © {new Date().getFullYear()} SÜTHÜM — {settings.tagline}. Tüm hakları saklıdır.
+        © {new Date().getFullYear()} {COMPANY.legalName} — {settings.tagline}. Tüm hakları saklıdır.
       </div>
     </footer>
   );
