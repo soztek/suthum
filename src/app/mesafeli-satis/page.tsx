@@ -51,11 +51,6 @@ export default async function Page() {
           İşbu sözleşmeden doğabilecek uyuşmazlıklarda, ilgili mevzuatça belirlenen parasal sınırlar dahilinde
           Tüketici Hakem Heyetleri ve Tüketici Mahkemeleri yetkilidir.
         </p>
-
-        <p className="pt-4 text-sm text-ink/50">
-          Not: Bu metin genel bilgilendirme amaçlıdır. Yayına almadan önce bir hukuk danışmanıyla işletmenize
-          özel olarak gözden geçirmeniz önerilir.
-        </p>
       </div>
     </div>
   );

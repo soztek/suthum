@@ -56,11 +56,6 @@ export default async function Page() {
           <br />
           Satıcı: {COMPANY.legalName} — {COMPANY.address}
         </p>
-
-        <p className="pt-4 text-sm text-ink/50">
-          Not: Bu metin bilgilendirme amaçlıdır; yayına almadan önce bir hukuk danışmanıyla işletmenize özel olarak
-          gözden geçirmeniz önerilir.
-        </p>
       </div>
     </div>
   );
