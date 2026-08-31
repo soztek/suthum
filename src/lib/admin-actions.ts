@@ -85,6 +85,44 @@ export async function saveProduct(formData: FormData) {
   redirect("/admin/urunler");
 }
 
+export async function duplicateProduct(formData: FormData) {
+  await guard();
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  const src = await prisma.product.findUnique({ where: { id } });
+  if (!src) return;
+
+  const name = `${src.name} (Kopya)`;
+  const baseSlug = slugify(name);
+  let slug = baseSlug;
+  let n = 1;
+  while (await prisma.product.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${++n}`;
+  }
+
+  const copy = await prisma.product.create({
+    data: {
+      name,
+      slug,
+      description: src.description,
+      price: src.price,
+      compareAt: src.compareAt,
+      unit: src.unit,
+      imageUrl: src.imageUrl,
+      images: src.images,
+      stock: src.stock,
+      isActive: false, // kopya taslak olarak pasif başlar
+      isFeatured: src.isFeatured,
+      coldChain: src.coldChain,
+      order: src.order,
+      categoryId: src.categoryId,
+    },
+  });
+
+  revalidatePath("/admin/urunler");
+  redirect(`/admin/urunler/${copy.id}`);
+}
+
 export async function deleteProduct(formData: FormData) {
   await guard();
   const id = String(formData.get("id") || "");

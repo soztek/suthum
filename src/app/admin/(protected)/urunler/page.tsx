@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Plus, Pencil, Star, Snowflake } from "lucide-react";
+import { Plus, Pencil, Star, Snowflake, Copy } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import { ProductImage } from "@/components/ProductImage";
-import { toggleProductActive, deleteProduct } from "@/lib/admin-actions";
+import { toggleProductActive, deleteProduct, duplicateProduct } from "@/lib/admin-actions";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { AdminProductSearch } from "@/components/admin/AdminProductSearch";
 
@@ -69,9 +69,15 @@ export default async function AdminProducts({
                 </button>
               </form>
               <div className="flex items-center justify-end gap-2">
-                <Link href={`/admin/urunler/${p.id}`} className="grid h-9 w-9 place-items-center rounded-lg border border-green-200 text-green-700 hover:bg-green-50">
+                <Link href={`/admin/urunler/${p.id}`} className="grid h-9 w-9 place-items-center rounded-lg border border-green-200 text-green-700 hover:bg-green-50" title="Düzenle">
                   <Pencil size={15} />
                 </Link>
+                <form action={duplicateProduct}>
+                  <input type="hidden" name="id" value={p.id} />
+                  <button className="grid h-9 w-9 place-items-center rounded-lg border border-orange-200 text-orange-600 hover:bg-orange-50" title="Kopyala">
+                    <Copy size={15} />
+                  </button>
+                </form>
                 <DeleteButton action={deleteProduct} id={p.id} confirmText={`"${p.name}" silinsin mi?`} />
               </div>
             </div>
