@@ -156,7 +156,7 @@ export default async function HomePage() {
             <div className="mt-8 grid grid-cols-3 gap-4">
               {[
                 { n: "100%", t: "Doğal & Katkısız" },
-                { n: "1.500m", t: "Yüksek rakım" },
+                { n: "2.030m", t: "Yüksek rakım" },
                 { n: "48 saat", t: "İçinde kargo" },
               ].map((s) => (
                 <div key={s.t} className="rounded-2xl bg-white/10 p-4 text-center ring-1 ring-white/15">

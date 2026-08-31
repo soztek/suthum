@@ -21,7 +21,7 @@ export default function AboutPage() {
       <section className="mx-auto max-w-4xl px-6 py-14">
         <div className="prose prose-green max-w-none text-ink/80">
           <p className="text-lg leading-relaxed">
-            Doğu Anadolu'nun eşsiz coğrafyasında, 1.500 metreyi aşan rakımda, temiz hava ve zengin bitki
+            Doğu Anadolu'nun eşsiz coğrafyasında, 2.030 metre rakımda, temiz hava ve zengin bitki
             örtüsüyle beslenen hayvanların sütü; peynirin, tereyağının ve balın en kalitelisini doğurur.
             Biz de bu bereketi, üreticiden alıp aracısız şekilde sofranıza getiriyoruz.
           </p>
