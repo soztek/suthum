@@ -53,7 +53,7 @@ export async function sendOrderEmails(orderId: string): Promise<void> {
 
     const settings = await getSettings();
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const from = process.env.MAIL_FROM || "SÜT-HÜM <onboarding@resend.dev>";
+    const from = process.env.MAIL_FROM || "SÜT-HÜM <siparis@suthum.com>";
     const adminTo = process.env.MAIL_ADMIN || process.env.ADMIN_EMAIL || settings.email;
 
     const summary = `
