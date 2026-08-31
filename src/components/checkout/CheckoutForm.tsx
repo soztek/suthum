@@ -65,8 +65,8 @@ export function CheckoutForm({
         setLoading(false);
         return;
       }
-      if (data.mode === "iyzico" && data.paymentPageUrl) {
-        window.location.href = data.paymentPageUrl;
+      if (data.mode === "paytr" && data.token) {
+        router.push(`/odeme/paytr?token=${encodeURIComponent(data.token)}`);
         return;
       }
       // demo mod
@@ -134,8 +134,8 @@ export function CheckoutForm({
           <div className="flex items-start gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-800">
             <AlertCircle size={20} className="mt-0.5 shrink-0" />
             <p>
-              <b>Test / Demo modu:</b> iyzico anahtarları henüz tanımlı değil. Siparişi onayladığınızda kart bilgisi
-              istenmeden sipariş oluşturulur. Gerçek ödeme için panelden iyzico anahtarlarını ekleyin.
+              <b>Test / Demo modu:</b> PayTR anahtarları henüz tanımlı değil. Siparişi onayladığınızda kart bilgisi
+              istenmeden sipariş oluşturulur. Gerçek ödeme için PayTR anahtarlarını (merchant_id/key/salt) ekleyin.
             </p>
           </div>
         )}

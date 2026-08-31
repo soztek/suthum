@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { orderNo, toNumber } from "@/lib/utils";
-import { isPaymentLive, initCheckoutForm } from "@/lib/iyzico";
+import { isPaytrLive, getPaytrToken } from "@/lib/paytr";
 import { getCurrentUser } from "@/lib/user-auth";
 import { sendOrderEmails } from "@/lib/email";
 
@@ -99,8 +99,8 @@ export async function POST(req: Request) {
     },
   });
 
-  // --- DEMO MOD: iyzico anahtarı yoksa ödeme simüle edilir ---
-  if (!isPaymentLive()) {
+  // --- DEMO MOD: PayTR anahtarı yoksa ödeme simüle edilir ---
+  if (!isPaytrLive()) {
     await prisma.order.update({
       where: { id: order.id },
       data: { paymentStatus: "PAID", status: "PREPARING" },
@@ -109,51 +109,33 @@ export async function POST(req: Request) {
     return NextResponse.json({ mode: "demo", orderNo: order.orderNo });
   }
 
-  // --- GERÇEK ÖDEME: iyzico Checkout Form ---
-  try {
-    const base = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin;
-    const xff = req.headers.get("x-forwarded-for");
-    const ip = (xff ? xff.split(",")[0].trim() : "") || "85.34.78.112";
+  // --- GERÇEK ÖDEME: PayTR iFrame ---
+  const base = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin;
+  const xff = req.headers.get("x-forwarded-for");
+  const ip = (xff ? xff.split(",")[0].trim() : "") || "85.34.78.112";
+  // PayTR merchant_oid yalnız harf+rakam olmalı; sipariş no'dan üretilir ve orderda saklanır.
+  const merchantOid = order.orderNo.replace(/[^a-zA-Z0-9]/g, "");
 
-    const result = await initCheckoutForm({
-      conversationId: order.id,
-      basketId: order.orderNo,
-      price: subtotal.toFixed(2),
-      paidPrice: total.toFixed(2),
-      callbackUrl: `${base}/api/payment/callback`,
-      buyer: {
-        id: order.id,
-        name: customer.fullName,
-        surname: "",
-        email: customer.email,
-        phone: customer.phone,
-        address: `${customer.address} ${customer.district ?? ""} ${customer.city}`.trim(),
-        city: customer.city,
-        ip,
-      },
-      items: lines.map((l) => ({
-        id: l.product.id,
-        name: l.product.name,
-        category: l.product.category.name,
-        price: l.lineTotal.toFixed(2),
-      })),
-    });
+  await prisma.order.update({ where: { id: order.id }, data: { iyziToken: merchantOid } });
 
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { iyziToken: result.token },
-    });
+  const result = await getPaytrToken({
+    merchantOid,
+    email: customer.email,
+    amount: total,
+    userName: customer.fullName,
+    userAddress: `${customer.address} ${customer.district ?? ""} ${customer.city}`.trim(),
+    userPhone: customer.phone,
+    userIp: ip,
+    basket: lines.map((l) => [l.product.name, l.unitPrice.toFixed(2), l.qty]),
+    okUrl: `${base}/odeme/sonuc?status=success&order=${order.orderNo}`,
+    failUrl: `${base}/odeme/sonuc?status=failed&order=${order.orderNo}`,
+  });
 
-    return NextResponse.json({ mode: "iyzico", paymentPageUrl: result.paymentPageUrl });
-  } catch (err) {
-    console.error("iyzico hata:", err);
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { paymentStatus: "FAILED" },
-    });
-    return NextResponse.json(
-      { error: "Ödeme başlatılamadı. Lütfen tekrar deneyin." },
-      { status: 502 }
-    );
+  if (!result.ok) {
+    console.error("PayTR token hatası:", result.error);
+    await prisma.order.update({ where: { id: order.id }, data: { paymentStatus: "FAILED" } });
+    return NextResponse.json({ error: result.error || "Ödeme başlatılamadı." }, { status: 502 });
   }
+
+  return NextResponse.json({ mode: "paytr", token: result.token });
 }

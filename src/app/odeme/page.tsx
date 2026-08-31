@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getSettings } from "@/lib/settings";
 import { getCurrentUser } from "@/lib/user-auth";
 import { toNumber } from "@/lib/utils";
-import { isPaymentLive } from "@/lib/iyzico";
+import { isPaytrLive } from "@/lib/paytr";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 
 export const metadata: Metadata = { title: "Ödeme" };
@@ -24,7 +24,7 @@ export default async function CheckoutPage() {
       <CheckoutForm
         freeShippingLimit={toNumber(settings.freeShippingLimit)}
         shippingFee={toNumber(settings.shippingFee)}
-        paymentLive={isPaymentLive()}
+        paymentLive={isPaytrLive()}
         initial={
           user
             ? {
