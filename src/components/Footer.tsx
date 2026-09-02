@@ -99,10 +99,7 @@ export async function Footer() {
       <div className="border-t border-green-700/60">
         <div className="mx-auto max-w-7xl px-6 py-5 text-xs leading-relaxed text-green-300">
           <p className="font-semibold text-green-100">{COMPANY.legalName}</p>
-          <p className="mt-1">
-            {COMPANY.taxOffice} · Vergi/TC No: {COMPANY.taxNo}
-            {" · "}Adres: {COMPANY.address}
-          </p>
+          <p className="mt-1">Adres: {COMPANY.address}</p>
         </div>
       </div>
 
