@@ -5,6 +5,7 @@ import { CartProvider } from "@/components/cart/CartProvider";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { VisitTracker } from "@/components/VisitTracker";
 import { getSettings } from "@/lib/settings";
 import { toNumber } from "@/lib/utils";
 
@@ -38,6 +39,7 @@ export default async function RootLayout({
     <html lang="tr" className={`${manrope.variable} antialiased`}>
       <body className="flex min-h-full flex-col">
         <CartProvider>
+          <VisitTracker />
           <Header />
           <main className="min-h-[60vh] flex-1">{children}</main>
           <Footer />
