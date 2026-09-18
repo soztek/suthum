@@ -173,6 +173,51 @@ export async function deleteCategory(formData: FormData) {
   revalidatePath("/");
 }
 
+// --- Kampanyalar (serbest afiş kartları) ---
+export async function saveCampaign(formData: FormData) {
+  await guard();
+  const id = String(formData.get("id") || "");
+  const title = String(formData.get("title") || "").trim();
+  if (!title) throw new Error("Kampanya başlığı zorunlu");
+
+  const data = {
+    title,
+    description: String(formData.get("description") || "") || null,
+    imageUrl: String(formData.get("imageUrl") || "") || null,
+    priceLabel: String(formData.get("priceLabel") || ""),
+    targetProductId: String(formData.get("targetProductId") || "") || null,
+    ctaLink: String(formData.get("ctaLink") || ""),
+    isActive: formData.get("isActive") === "on",
+    order: Number(formData.get("order") || 0),
+  };
+
+  if (id) {
+    await prisma.campaign.update({ where: { id }, data });
+  } else {
+    await prisma.campaign.create({ data });
+  }
+  revalidatePath("/admin/kampanyalar");
+  revalidatePath("/kampanyalar");
+  redirect("/admin/kampanyalar");
+}
+
+export async function deleteCampaign(formData: FormData) {
+  await guard();
+  const id = String(formData.get("id") || "");
+  if (id) await prisma.campaign.delete({ where: { id } });
+  revalidatePath("/admin/kampanyalar");
+  revalidatePath("/kampanyalar");
+}
+
+export async function toggleCampaignActive(formData: FormData) {
+  await guard();
+  const id = String(formData.get("id") || "");
+  const c = await prisma.campaign.findUnique({ where: { id } });
+  if (c) await prisma.campaign.update({ where: { id }, data: { isActive: !c.isActive } });
+  revalidatePath("/admin/kampanyalar");
+  revalidatePath("/kampanyalar");
+}
+
 // --- Siparişler ---
 export async function updateOrderStatus(formData: FormData) {
   await guard();

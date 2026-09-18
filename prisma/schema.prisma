@@ -40,10 +40,28 @@ model Product {
   categoryId  String
   category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   orderItems  OrderItem[]
+  campaigns   Campaign[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
   @@index([categoryId])
+}
+
+// Serbest kampanya kartı (ürüne bağlı olabilir; Kampanyalar sayfasında afiş olarak gösterilir)
+model Campaign {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?  @db.Text
+  imageUrl        String?
+  priceLabel      String   @default("") // serbest metin: "₺599", "2 AL 1 ÖDE", "%20 İndirim"
+  targetProductId String?
+  targetProduct   Product? @relation(fields: [targetProductId], references: [id], onDelete: SetNull)
+  ctaLink         String   @default("") // bağlı ürün yoksa buton linki
+  isActive        Boolean  @default(true)
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  @@index([targetProductId])
 }
 
 model Order {
