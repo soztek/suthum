@@ -68,6 +68,9 @@ export function MobileNav({
               {c.name}
             </Link>
           ))}
+          <Link href="/kampanyalar" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2.5 font-semibold text-orange-600 hover:bg-orange-50">
+            🏷️ Kampanyalar
+          </Link>
           <Link href="/hakkimizda" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
             Hakkımızda
           </Link>

@@ -18,6 +18,7 @@ export function toProductDTO(p: ProductWithCategory): ProductDTO {
     stock: p.stock,
     coldChain: p.coldChain,
     isFeatured: p.isFeatured,
+    isCampaign: p.isCampaign,
     rating: p.rating,
     reviewCount: p.reviewCount,
     categoryName: p.category?.name,

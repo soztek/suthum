@@ -32,6 +32,7 @@ model Product {
   stock       Int         @default(100)
   isActive    Boolean     @default(true)
   isFeatured  Boolean     @default(false)
+  isCampaign  Boolean     @default(false) // kampanyalı ürün (Kampanyalar sayfasında listelenir)
   coldChain   Boolean     @default(false) // soğuk zincir gönderim rozeti
   rating      Float       @default(5)
   reviewCount Int         @default(0)

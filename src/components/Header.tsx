@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone, User } from "lucide-react";
+import { Phone, User, Tag } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { getCurrentUser } from "@/lib/user-auth";
@@ -129,6 +129,16 @@ export async function Header() {
                 <span className="text-center text-sm font-semibold text-ink group-hover:text-green-700">{c.name}</span>
               </Link>
             ))}
+            {/* Kampanyalar — özel buton (Paketler'in yanında) */}
+            <Link
+              href="/kampanyalar"
+              className="group flex flex-1 flex-col items-center gap-2 border-l-2 border-green-200/70 px-3 py-4 transition hover:bg-orange-50/70"
+            >
+              <span className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white ring-2 ring-orange-100 transition group-hover:scale-110">
+                <Tag size={30} />
+              </span>
+              <span className="text-center text-sm font-semibold text-orange-600 group-hover:text-orange-700">Kampanyalar</span>
+            </Link>
           </div>
         </nav>
       </header>

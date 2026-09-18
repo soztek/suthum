@@ -12,6 +12,7 @@ export interface ProductDTO {
   stock: number;
   coldChain: boolean;
   isFeatured: boolean;
+  isCampaign: boolean;
   rating: number;
   reviewCount: number;
   categoryName?: string;

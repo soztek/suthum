@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Star, Snowflake } from "lucide-react";
+import { Star, Snowflake, Tag } from "lucide-react";
 import { ProductImage } from "./ProductImage";
 import { AddToCartButton } from "./cart/AddToCartButton";
 import type { ProductDTO } from "@/lib/types";
@@ -18,6 +18,11 @@ export function ProductCard({ product }: { product: ProductDTO }) {
           className="aspect-square"
         />
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+          {product.isCampaign && (
+            <span className="flex items-center gap-1 rounded-full bg-orange-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow">
+              <Tag size={11} /> Kampanya
+            </span>
+          )}
           {discount && (
             <span className="rounded-full bg-orange-500 px-2.5 py-1 text-xs font-bold text-white shadow">
               %{discount}

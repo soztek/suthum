@@ -64,6 +64,7 @@ export async function saveProduct(formData: FormData) {
     stock: Number(formData.get("stock") || 100),
     isActive: formData.get("isActive") === "on",
     isFeatured: formData.get("isFeatured") === "on",
+    isCampaign: formData.get("isCampaign") === "on",
     coldChain: formData.get("coldChain") === "on",
     categoryId,
   };
@@ -113,6 +114,7 @@ export async function duplicateProduct(formData: FormData) {
       stock: src.stock,
       isActive: false, // kopya taslak olarak pasif başlar
       isFeatured: src.isFeatured,
+      isCampaign: src.isCampaign,
       coldChain: src.coldChain,
       order: src.order,
       categoryId: src.categoryId,

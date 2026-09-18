@@ -94,6 +94,9 @@ export default async function ProductForm({
               <input type="checkbox" name="isFeatured" defaultChecked={product?.isFeatured ?? false} className="h-4 w-4 accent-green-600" /> Öne çıkan
             </label>
             <label className="flex items-center gap-2 text-sm font-medium text-ink/80">
+              <input type="checkbox" name="isCampaign" defaultChecked={product?.isCampaign ?? false} className="h-4 w-4 accent-orange-500" /> Kampanyalı
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium text-ink/80">
               <input type="checkbox" name="coldChain" defaultChecked={product?.coldChain ?? false} className="h-4 w-4 accent-green-600" /> Soğuk zincir
             </label>
           </div>
