@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone, User, Tag } from "lucide-react";
+import { Phone, User, Percent } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { getCurrentUser } from "@/lib/user-auth";
@@ -129,15 +129,23 @@ export async function Header() {
                 <span className="text-center text-sm font-semibold text-ink group-hover:text-green-700">{c.name}</span>
               </Link>
             ))}
-            {/* Kampanyalar — özel buton (Paketler'in yanında) */}
+            {/* Kampanyalar — özel dikkat çekici buton (Paketler'in yanında) */}
             <Link
               href="/kampanyalar"
-              className="group flex flex-1 flex-col items-center gap-2 border-l-2 border-green-200/70 px-3 py-4 transition hover:bg-orange-50/70"
+              className="group relative flex flex-1 flex-col items-center gap-2 border-l-2 border-green-200/70 px-3 py-4 transition hover:bg-orange-50/70"
             >
-              <span className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-white ring-2 ring-orange-100 transition group-hover:scale-110">
-                <Tag size={30} />
+              <span className="relative grid h-20 w-20 place-items-center">
+                {/* nabız halkası */}
+                <span className="absolute inset-0 rounded-full bg-orange-400/40 animate-ping" />
+                <span className="relative grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 text-white shadow-lg ring-4 ring-orange-200 transition group-hover:scale-110">
+                  <Percent size={30} strokeWidth={2.6} />
+                </span>
+                {/* FIRSAT rozeti */}
+                <span className="absolute -right-1 -top-1 z-10 rotate-6 rounded-full bg-green-700 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-white shadow ring-2 ring-white">
+                  Fırsat
+                </span>
               </span>
-              <span className="text-center text-sm font-semibold text-orange-600 group-hover:text-orange-700">Kampanyalar</span>
+              <span className="text-center text-sm font-extrabold text-orange-600 group-hover:text-orange-700">Kampanyalar</span>
             </Link>
           </div>
         </nav>
