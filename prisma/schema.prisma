@@ -134,6 +134,15 @@ model Setting {
   heroTitle         String  @default("Ardahan'ın Yaylalarından Sofranıza")
   heroSubtitle      String  @default("Doğal, katkısız ve yöresel lezzetler; soğuk zincirle kapınızda.")
   announcement      String  @default("₺2000 ve üzeri siparişlerde ÜCRETSİZ soğuk zincir kargo")
+
+  // Kampanya popup (girişte gösterilen)
+  popupActive   Boolean @default(false)
+  popupTitle    String  @default("")
+  popupText     String  @default("") @db.Text
+  popupImageUrl String?
+  popupCtaText  String  @default("")
+  popupCtaLink  String  @default("")
+
   updatedAt         DateTime @updatedAt
 }
 

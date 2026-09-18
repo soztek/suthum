@@ -6,6 +6,7 @@ import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { VisitTracker } from "@/components/VisitTracker";
+import { CampaignPopup } from "@/components/CampaignPopup";
 import { getSettings } from "@/lib/settings";
 import { toNumber } from "@/lib/utils";
 
@@ -40,6 +41,14 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col">
         <CartProvider>
           <VisitTracker />
+          <CampaignPopup
+            active={settings.popupActive}
+            title={settings.popupTitle}
+            text={settings.popupText}
+            imageUrl={settings.popupImageUrl}
+            ctaText={settings.popupCtaText}
+            ctaLink={settings.popupCtaLink}
+          />
           <Header />
           <main className="min-h-[60vh] flex-1">{children}</main>
           <Footer />

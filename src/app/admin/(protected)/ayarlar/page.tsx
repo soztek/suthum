@@ -2,6 +2,7 @@ import { CheckCircle2 } from "lucide-react";
 import { getSettings } from "@/lib/settings";
 import { toNumber } from "@/lib/utils";
 import { saveSettings } from "@/lib/admin-actions";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,22 @@ export default async function AdminSettings({
           <div><label className={labelCls}>Duyuru Şeridi</label><input name="announcement" defaultValue={s.announcement} className={inputCls} /></div>
           <div><label className={labelCls}>Hero Başlık</label><input name="heroTitle" defaultValue={s.heroTitle} className={inputCls} /></div>
           <div><label className={labelCls}>Hero Alt Başlık</label><textarea name="heroSubtitle" rows={2} defaultValue={s.heroSubtitle} className={inputCls} /></div>
+        </fieldset>
+
+        <fieldset className="space-y-4 rounded-2xl border border-green-100 bg-white p-6">
+          <legend className="px-2 text-sm font-bold text-green-700">Kampanya Popup</legend>
+          <label className="flex items-center gap-3 rounded-xl bg-green-50/60 px-4 py-3 text-sm font-medium text-ink">
+            <input type="checkbox" name="popupActive" defaultChecked={s.popupActive} className="h-4 w-4 accent-green-600" />
+            Popup&apos;ı göster (siteye girenlere günde bir kez açılır)
+          </label>
+          <div><label className={labelCls}>Başlık</label><input name="popupTitle" defaultValue={s.popupTitle} className={inputCls} placeholder="Örn: Sonbahar Kampanyası 🍂" /></div>
+          <div><label className={labelCls}>Metin</label><textarea name="popupText" rows={3} defaultValue={s.popupText} className={inputCls} placeholder="Örn: Tüm kaşar çeşitlerinde %15 indirim! Kaçırmayın." /></div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div><label className={labelCls}>Buton Yazısı (opsiyonel)</label><input name="popupCtaText" defaultValue={s.popupCtaText} className={inputCls} placeholder="Örn: Kampanyaya Git" /></div>
+            <div><label className={labelCls}>Buton Linki (opsiyonel)</label><input name="popupCtaLink" defaultValue={s.popupCtaLink} className={inputCls} placeholder="Örn: /kategori/peynir-cesitleri" /></div>
+          </div>
+          <ImageUpload name="popupImageUrl" defaultValue={s.popupImageUrl ?? ""} label="Popup Görseli (opsiyonel)" />
+          <p className="text-xs text-ink/50">İpucu: Sadece başlık + metin de yeterli. Görsel ve buton opsiyonel. Kampanya bitince üstteki kutunun işaretini kaldırıp kaydet.</p>
         </fieldset>
 
         <button className="rounded-full bg-green-600 px-8 py-3 font-semibold text-white hover:bg-green-700">

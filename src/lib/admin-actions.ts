@@ -213,6 +213,12 @@ export async function saveSettings(formData: FormData) {
       announcement: String(formData.get("announcement") || ""),
       freeShippingLimit: dec(formData.get("freeShippingLimit")) ?? new Prisma.Decimal(2000),
       shippingFee: dec(formData.get("shippingFee")) ?? new Prisma.Decimal(89.9),
+      popupActive: formData.get("popupActive") === "on",
+      popupTitle: String(formData.get("popupTitle") || ""),
+      popupText: String(formData.get("popupText") || ""),
+      popupImageUrl: String(formData.get("popupImageUrl") || "") || null,
+      popupCtaText: String(formData.get("popupCtaText") || ""),
+      popupCtaLink: String(formData.get("popupCtaLink") || ""),
     },
   });
   revalidatePath("/", "layout");
