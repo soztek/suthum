@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Phone, User, Percent } from "lucide-react";
-import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
+import { getNavCategories } from "@/lib/catalog";
 import { getCurrentUser } from "@/lib/user-auth";
 import { CartButton } from "./cart/CartButton";
 import { MobileNav } from "./MobileNav";
@@ -11,11 +11,7 @@ import { SearchBar } from "./SearchBar";
 export async function Header() {
   const [settings, categories, user] = await Promise.all([
     getSettings(),
-    prisma.category.findMany({
-      where: { isActive: true },
-      orderBy: { order: "asc" },
-      select: { name: true, slug: true, emoji: true, imageUrl: true },
-    }),
+    getNavCategories(),
     getCurrentUser(),
   ]);
 

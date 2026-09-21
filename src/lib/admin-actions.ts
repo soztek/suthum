@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
@@ -160,6 +160,7 @@ export async function saveCategory(formData: FormData) {
     while (await prisma.category.findUnique({ where: { slug } })) slug = `${slugify(name)}-${++n}`;
     await prisma.category.create({ data: { name, slug, emoji, imageUrl, order } });
   }
+  revalidateTag("categories", "max");
   revalidatePath("/admin/kategoriler");
   revalidatePath("/");
   redirect("/admin/kategoriler?ok=1");
@@ -169,6 +170,7 @@ export async function deleteCategory(formData: FormData) {
   await guard();
   const id = String(formData.get("id") || "");
   if (id) await prisma.category.delete({ where: { id } });
+  revalidateTag("categories", "max");
   revalidatePath("/admin/kategoriler");
   revalidatePath("/");
 }
@@ -268,6 +270,7 @@ export async function saveSettings(formData: FormData) {
       popupCtaLink: String(formData.get("popupCtaLink") || ""),
     },
   });
+  revalidateTag("settings", "max");
   revalidatePath("/", "layout");
   redirect("/admin/ayarlar?ok=1");
 }
