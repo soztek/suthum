@@ -14,12 +14,18 @@ export async function POST(req: Request) {
       return new NextResponse(null, { status: 204 });
     }
 
+    const ua = req.headers.get("user-agent")?.slice(0, 500) ?? null;
+
+    // Bot / tarayıcı olmayan istekleri sayma
+    if (ua && /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|preview|monitor|headless|python-requests|curl|wget|axios|node-fetch|lighthouse|pingdom|uptime/i.test(ua)) {
+      return new NextResponse(null, { status: 204 });
+    }
+
     const xff = req.headers.get("x-forwarded-for");
     const ip =
       (xff ? xff.split(",")[0].trim() : "") ||
       req.headers.get("x-real-ip") ||
       "bilinmiyor";
-    const ua = req.headers.get("user-agent")?.slice(0, 500) ?? null;
 
     await prisma.visit.create({
       data: { ip, path: path.slice(0, 300), ua },

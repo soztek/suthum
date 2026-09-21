@@ -46,3 +46,6 @@ next-env.d.ts
 # orijinal büyük logo kaynak dosyaları (işlenmişi public/logo.png repoda)
 /SÜTHÜM LOGO SON UYGULAMA JPEG.jpg
 /SÜTHÜM LOGO SON UYGULAMA PNG.png
+
+# Veritabanı yedekleri (PII içerir, commit edilmez)
+backups/
