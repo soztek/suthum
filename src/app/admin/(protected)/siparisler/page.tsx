@@ -2,7 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import { Landmark } from "lucide-react";
 import { OrderStatusBadge } from "@/components/admin/OrderStatusBadge";
+import { PrintLabelButton } from "@/components/admin/PrintLabelButton";
 import { updateOrderStatus, markOrderPaid } from "@/lib/admin-actions";
+import { getSettings } from "@/lib/settings";
+import { COMPANY } from "@/lib/company";
 
 export const dynamic = "force-dynamic";
 
@@ -16,10 +19,19 @@ const LABELS: Record<string, string> = {
 };
 
 export default async function AdminOrders() {
-  const orders = await prisma.order.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { items: true, user: { select: { name: true } } },
-  });
+  const [orders, settings] = await Promise.all([
+    prisma.order.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { items: true, user: { select: { name: true } } },
+    }),
+    getSettings(),
+  ]);
+
+  const sender = {
+    name: COMPANY.legalName,
+    address: COMPANY.address,
+    phone: settings.phone,
+  };
 
   return (
     <div>
@@ -99,6 +111,23 @@ export default async function AdminOrders() {
                     </button>
                   </form>
                 )}
+                <PrintLabelButton
+                  sender={sender}
+                  order={{
+                    orderNo: o.orderNo,
+                    fullName: o.fullName,
+                    phone: o.phone,
+                    address: o.address,
+                    district: o.district,
+                    city: o.city,
+                    note: o.note,
+                    createdAt: new Date(o.createdAt).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }),
+                    items: o.items.map((it) => ({ name: it.name, quantity: it.quantity })),
+                    total: formatPrice(o.total),
+                    paymentMethod: o.paymentMethod,
+                    paymentStatus: o.paymentStatus,
+                  }}
+                />
               </div>
             </div>
           ))}
