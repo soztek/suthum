@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { orderNo, toNumber } from "@/lib/utils";
 import { isPaytrLive, getPaytrToken } from "@/lib/paytr";
-import { getCurrentUser } from "@/lib/user-auth";
+import { getCurrentUser, hashPassword, createUserSession } from "@/lib/user-auth";
 import { sendOrderEmails } from "@/lib/email";
 
 const schema = z.object({
@@ -22,6 +22,8 @@ const schema = z.object({
     .array(z.object({ productId: z.string(), qty: z.number().int().positive() }))
     .min(1, "Sepet boş"),
   paymentMethod: z.enum(["card", "havale"]).optional(),
+  createAccount: z.boolean().optional(),
+  password: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -67,6 +69,37 @@ export async function POST(req: Request) {
   }
 
   const currentUser = await getCurrentUser();
+
+  // Misafir isterse siparişle birlikte üyelik oluştur
+  let userId = currentUser?.id ?? null;
+  let accountCreated = false;
+  if (!currentUser && parsed.data.createAccount) {
+    const pw = parsed.data.password ?? "";
+    if (pw.length < 6) {
+      return NextResponse.json(
+        { error: "Üyelik için en az 6 karakterli bir şifre girin." },
+        { status: 400 }
+      );
+    }
+    const existing = await prisma.user.findUnique({ where: { email: customer.email } });
+    if (!existing) {
+      const newUser = await prisma.user.create({
+        data: {
+          name: customer.fullName,
+          email: customer.email,
+          phone: customer.phone,
+          city: customer.city,
+          address: customer.address,
+          passwordHash: await hashPassword(pw),
+        },
+      });
+      await createUserSession(newUser.id);
+      userId = newUser.id;
+      accountCreated = true;
+    }
+    // E-posta zaten kayıtlıysa hesap oluşturulmaz; sipariş misafir olarak devam eder.
+  }
+
   const settings = await getSettings();
   const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
   const freeLimit = toNumber(settings.freeShippingLimit);
@@ -84,7 +117,7 @@ export async function POST(req: Request) {
       city: customer.city,
       district: customer.district || null,
       note: customer.note || null,
-      userId: currentUser?.id ?? null,
+      userId,
       paymentMethod: payMethod,
       subtotal: new Prisma.Decimal(subtotal.toFixed(2)),
       shipping: new Prisma.Decimal(shipping.toFixed(2)),
@@ -105,7 +138,7 @@ export async function POST(req: Request) {
   // --- HAVALE / EFT: kart çekilmez, sipariş "ödeme bekliyor" olarak oluşur ---
   if (payMethod === "havale") {
     await sendOrderEmails(order.id);
-    return NextResponse.json({ mode: "havale", orderNo: order.orderNo });
+    return NextResponse.json({ mode: "havale", orderNo: order.orderNo, accountCreated });
   }
 
   // --- DEMO MOD: PayTR anahtarı yoksa ödeme simüle edilir ---
@@ -115,7 +148,7 @@ export async function POST(req: Request) {
       data: { paymentStatus: "PAID", status: "PREPARING" },
     });
     await sendOrderEmails(order.id);
-    return NextResponse.json({ mode: "demo", orderNo: order.orderNo });
+    return NextResponse.json({ mode: "demo", orderNo: order.orderNo, accountCreated });
   }
 
   // --- GERÇEK ÖDEME: PayTR iFrame ---
@@ -154,5 +187,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: result.error || "Ödeme başlatılamadı." }, { status: 502 });
   }
 
-  return NextResponse.json({ mode: "paytr", token: result.token });
+  return NextResponse.json({ mode: "paytr", token: result.token, accountCreated });
 }

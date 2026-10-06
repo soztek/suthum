@@ -12,11 +12,13 @@ export function CheckoutForm({
   freeShippingLimit,
   shippingFee,
   paymentLive,
+  loggedIn = false,
   initial,
 }: {
   freeShippingLimit: number;
   shippingFee: number;
   paymentLive: boolean;
+  loggedIn?: boolean;
   initial?: {
     fullName?: string;
     email?: string;
@@ -30,6 +32,8 @@ export function CheckoutForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [payMethod, setPayMethod] = useState<"card" | "havale">("card");
+  const [createAccount, setCreateAccount] = useState(false);
+  const [password, setPassword] = useState("");
   const [form, setForm] = useState({
     fullName: initial?.fullName ?? "",
     email: initial?.email ?? "",
@@ -50,6 +54,10 @@ export function CheckoutForm({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!loggedIn && createAccount && password.trim().length < 6) {
+      setError("Üyelik için en az 6 karakterli bir şifre girin.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/checkout", {
@@ -59,6 +67,8 @@ export function CheckoutForm({
           customer: form,
           items: items.map((i) => ({ productId: i.productId, qty: i.qty })),
           paymentMethod: payMethod,
+          createAccount: !loggedIn && createAccount,
+          password: !loggedIn && createAccount ? password : undefined,
         }),
       });
       const data = await res.json();
@@ -136,6 +146,41 @@ export function CheckoutForm({
             </div>
           </div>
         </div>
+
+        {!loggedIn && (
+          <div className="rounded-2xl border border-green-100 bg-white p-6">
+            <label className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={createAccount}
+                onChange={(e) => setCreateAccount(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-green-600"
+              />
+              <span className="text-sm text-ink">
+                <b>Bu bilgilerle üyelik oluştur</b>
+                <span className="mt-0.5 block text-ink/55">
+                  Siparişlerini takip et, bir dahakine bilgilerin otomatik dolsun. Sadece bir şifre belirle.
+                </span>
+              </span>
+            </label>
+            {createAccount && (
+              <div className="mt-4">
+                <label className="mb-1.5 block text-sm font-medium text-ink/70">Şifre belirle *</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={inputCls}
+                  placeholder="En az 6 karakter"
+                  autoComplete="new-password"
+                />
+                <p className="mt-1.5 text-xs text-ink/50">
+                  Üyelik e-postan: <b>{form.email || "yukarıdaki e-posta"}</b>
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {paymentLive && (
           <div className="rounded-2xl border border-green-100 bg-white p-6">

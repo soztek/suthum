@@ -25,6 +25,7 @@ export default async function CheckoutPage() {
         freeShippingLimit={toNumber(settings.freeShippingLimit)}
         shippingFee={toNumber(settings.shippingFee)}
         paymentLive={isPaytrLive()}
+        loggedIn={!!user}
         initial={
           user
             ? {
