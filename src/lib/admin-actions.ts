@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { checkCredentials, createSession, destroySession, isAuthed } from "./auth";
 import { slugify } from "./utils";
+import { sendShippedEmail } from "./email";
 
 async function guard() {
   if (!(await isAuthed())) throw new Error("Yetkisiz");
@@ -226,8 +227,18 @@ export async function updateOrderStatus(formData: FormData) {
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "") as
     | "PENDING" | "PREPARING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  const trackingNo = String(formData.get("trackingNo") || "").trim();
+
   if (id && status) {
-    await prisma.order.update({ where: { id }, data: { status } });
+    const current = await prisma.order.findUnique({ where: { id }, select: { status: true } });
+    await prisma.order.update({
+      where: { id },
+      data: { status, ...(trackingNo ? { trackingNo } : {}) },
+    });
+    // Yalnızca "Kargoda"ya İLK geçişte müşteriye mail at
+    if (status === "SHIPPED" && current?.status !== "SHIPPED") {
+      await sendShippedEmail(id);
+    }
   }
   revalidatePath("/admin/siparisler");
 }

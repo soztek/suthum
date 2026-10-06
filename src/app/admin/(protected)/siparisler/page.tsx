@@ -99,6 +99,12 @@ export default async function AdminOrders() {
                       <option key={s} value={s}>{LABELS[s]}</option>
                     ))}
                   </select>
+                  <input
+                    name="trackingNo"
+                    defaultValue={o.trackingNo ?? ""}
+                    placeholder="Kargo takip no (ops.)"
+                    className="rounded-lg border border-green-200 bg-white px-3 py-2 text-sm outline-none focus:border-green-500"
+                  />
                   <button className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700">
                     Güncelle
                   </button>

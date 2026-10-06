@@ -128,3 +128,45 @@ export async function sendOrderEmails(orderId: string): Promise<void> {
     console.error("Sipariş maili gönderilemedi:", err);
   }
 }
+
+/** Sipariş kargoya verildiğinde müşteriye bildirim. Hata siparişi bozmaz. */
+export async function sendShippedEmail(orderId: string): Promise<void> {
+  if (!isEmailLive()) return;
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+    if (!order) return;
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const from = process.env.MAIL_FROM || "SÜT-HÜM <siparis@suthum.com>";
+
+    const tracking = order.trackingNo
+      ? `<div style="margin-top:12px;padding:12px 14px;background:#eaf7ef;border-radius:10px;color:#1a2b23;font-size:14px">
+           <b>Kargo Takip No:</b> <span style="font-weight:700;color:#147a3f">${order.trackingNo}</span>
+         </div>`
+      : "";
+
+    await resend.emails.send({
+      from,
+      to: order.email,
+      subject: `Siparişiniz kargoya verildi 🚚 — ${order.orderNo}`,
+      html: shell(
+        "Siparişiniz yola çıktı! 🚚",
+        `<p style="color:#555">Merhaba ${order.fullName}, <b>${order.orderNo}</b> numaralı siparişiniz kargoya verildi ve en kısa sürede adresinize ulaşacak.</p>
+         ${tracking}
+         <div style="margin-top:12px">
+           <p style="color:#555;margin:0 0 4px">Sipariş İçeriği:</p>
+           ${itemsTable(order.items)}
+           <div style="margin-top:12px;padding-top:12px;border-top:2px solid #147a3f;font-weight:800;color:#1a2b23">
+             <span>Toplam: </span><span style="color:#147a3f">${formatPrice(order.total as unknown as number)}</span>
+           </div>
+         </div>
+         <p style="color:#777;font-size:13px;margin-top:16px">Teslimat: ${order.address}, ${order.district ? order.district + ", " : ""}${order.city}</p>`
+      ),
+    });
+  } catch (err) {
+    console.error("Kargo maili gönderilemedi:", err);
+  }
+}
