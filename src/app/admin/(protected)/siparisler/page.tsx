@@ -94,7 +94,7 @@ export default async function AdminOrders() {
                 <form action={updateOrderStatus} className="flex flex-wrap items-center gap-2">
                   <input type="hidden" name="id" value={o.id} />
                   <label className="text-sm font-medium text-ink/60">Durum:</label>
-                  <select name="status" defaultValue={o.status} className="rounded-lg border border-green-200 bg-white px-3 py-2 text-sm outline-none focus:border-green-500">
+                  <select key={o.status} name="status" defaultValue={o.status} className="rounded-lg border border-green-200 bg-white px-3 py-2 text-sm outline-none focus:border-green-500">
                     {STATUSES.map((s) => (
                       <option key={s} value={s}>{LABELS[s]}</option>
                     ))}
