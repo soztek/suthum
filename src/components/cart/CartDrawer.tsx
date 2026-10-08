@@ -107,6 +107,13 @@ export function CartDrawer({ freeShippingLimit }: { freeShippingLimit: number })
               >
                 Ödemeye Geç
               </Link>
+              <button
+                type="button"
+                onClick={close}
+                className="mt-3 block w-full rounded-full border border-green-300 bg-white px-6 py-3 text-center text-sm font-semibold text-green-700 transition hover:bg-green-50"
+              >
+                Alışverişe Devam Et
+              </button>
               <Link href="/sepet" onClick={close} className="mt-2 block text-center text-sm text-green-700 hover:underline">
                 Sepeti Görüntüle
               </Link>
