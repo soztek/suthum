@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import { Landmark } from "lucide-react";
@@ -18,14 +19,41 @@ const LABELS: Record<string, string> = {
   CANCELLED: "İptal",
 };
 
-export default async function AdminOrders() {
-  const [orders, settings] = await Promise.all([
+// Ödeme durumuna göre sekmeler
+const TABS = [
+  { key: "paid", label: "Ödenen", where: { paymentStatus: "PAID" as const } },
+  { key: "pending", label: "Ödeme Bekleyen", where: { paymentStatus: "PENDING" as const } },
+  { key: "failed", label: "Başarısız", where: { paymentStatus: "FAILED" as const } },
+  { key: "all", label: "Tümü", where: {} },
+] as const;
+
+export default async function AdminOrders({
+  searchParams,
+}: {
+  searchParams: Promise<{ durum?: string }>;
+}) {
+  const { durum } = await searchParams;
+  const active = TABS.find((t) => t.key === durum) ?? TABS[0]; // varsayılan: Ödenen
+
+  const [orders, settings, counts] = await Promise.all([
     prisma.order.findMany({
+      where: active.where,
       orderBy: { createdAt: "desc" },
       include: { items: true, user: { select: { name: true } } },
     }),
     getSettings(),
+    prisma.order.groupBy({ by: ["paymentStatus"], _count: { _all: true } }),
   ]);
+
+  const countOf = (ps: "PAID" | "PENDING" | "FAILED") =>
+    counts.find((c) => c.paymentStatus === ps)?._count._all ?? 0;
+  const totalCount = counts.reduce((s, c) => s + c._count._all, 0);
+  const tabCount: Record<string, number> = {
+    paid: countOf("PAID"),
+    pending: countOf("PENDING"),
+    failed: countOf("FAILED"),
+    all: totalCount,
+  };
 
   const sender = {
     name: COMPANY.legalName,
@@ -35,11 +63,32 @@ export default async function AdminOrders() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-ink">Siparişler <span className="text-base font-medium text-ink/40">({orders.length})</span></h1>
+      <h1 className="text-2xl font-extrabold text-ink">Siparişler <span className="text-base font-medium text-ink/40">({tabCount[active.key]})</span></h1>
+
+      {/* Ödeme durumu sekmeleri */}
+      <div className="mt-4 flex flex-wrap gap-2">
+        {TABS.map((t) => {
+          const isActive = t.key === active.key;
+          return (
+            <Link
+              key={t.key}
+              href={t.key === "paid" ? "/admin/siparisler" : `/admin/siparisler?durum=${t.key}`}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                isActive ? "bg-green-600 text-white" : "border border-green-200 bg-white text-ink/70 hover:bg-green-50"
+              }`}
+            >
+              {t.label}
+              <span className={`rounded-full px-2 py-0.5 text-xs ${isActive ? "bg-white/20" : "bg-green-50 text-green-700"}`}>
+                {tabCount[t.key]}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
 
       {orders.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-dashed border-green-200 bg-white p-12 text-center text-ink/50">
-          Henüz sipariş yok.
+          Bu bölümde sipariş yok.
         </div>
       ) : (
         <div className="mt-6 space-y-4">
