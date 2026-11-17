@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag, updateTag } from "next/cache";
+import { CATALOG_TAG } from "./cached";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
@@ -82,6 +83,8 @@ export async function saveProduct(formData: FormData) {
     await prisma.product.create({ data: { ...data, slug } });
   }
 
+  updateTag(CATALOG_TAG);
+
   revalidatePath("/admin/urunler");
   revalidatePath("/");
   redirect("/admin/urunler");
@@ -122,6 +125,8 @@ export async function duplicateProduct(formData: FormData) {
     },
   });
 
+  updateTag(CATALOG_TAG);
+
   revalidatePath("/admin/urunler");
   redirect(`/admin/urunler/${copy.id}`);
 }
@@ -130,6 +135,7 @@ export async function deleteProduct(formData: FormData) {
   await guard();
   const id = String(formData.get("id") || "");
   if (id) await prisma.product.delete({ where: { id } });
+  updateTag(CATALOG_TAG);
   revalidatePath("/admin/urunler");
   revalidatePath("/");
 }
@@ -139,6 +145,7 @@ export async function toggleProductActive(formData: FormData) {
   const id = String(formData.get("id") || "");
   const p = await prisma.product.findUnique({ where: { id } });
   if (p) await prisma.product.update({ where: { id }, data: { isActive: !p.isActive } });
+  updateTag(CATALOG_TAG);
   revalidatePath("/admin/urunler");
   revalidatePath("/");
 }
@@ -162,6 +169,7 @@ export async function saveCategory(formData: FormData) {
     await prisma.category.create({ data: { name, slug, emoji, imageUrl, order } });
   }
   revalidateTag("categories", "max");
+  updateTag(CATALOG_TAG);
   revalidatePath("/admin/kategoriler");
   revalidatePath("/");
   redirect("/admin/kategoriler?ok=1");
@@ -172,6 +180,7 @@ export async function deleteCategory(formData: FormData) {
   const id = String(formData.get("id") || "");
   if (id) await prisma.category.delete({ where: { id } });
   revalidateTag("categories", "max");
+  updateTag(CATALOG_TAG);
   revalidatePath("/admin/kategoriler");
   revalidatePath("/");
 }
@@ -199,6 +208,7 @@ export async function saveCampaign(formData: FormData) {
   } else {
     await prisma.campaign.create({ data });
   }
+  updateTag(CATALOG_TAG);
   revalidatePath("/admin/kampanyalar");
   revalidatePath("/kampanyalar");
   redirect("/admin/kampanyalar");
@@ -208,6 +218,7 @@ export async function deleteCampaign(formData: FormData) {
   await guard();
   const id = String(formData.get("id") || "");
   if (id) await prisma.campaign.delete({ where: { id } });
+  updateTag(CATALOG_TAG);
   revalidatePath("/admin/kampanyalar");
   revalidatePath("/kampanyalar");
 }
@@ -217,6 +228,7 @@ export async function toggleCampaignActive(formData: FormData) {
   const id = String(formData.get("id") || "");
   const c = await prisma.campaign.findUnique({ where: { id } });
   if (c) await prisma.campaign.update({ where: { id }, data: { isActive: !c.isActive } });
+  updateTag(CATALOG_TAG);
   revalidatePath("/admin/kampanyalar");
   revalidatePath("/kampanyalar");
 }

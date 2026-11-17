@@ -1,17 +1,20 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin, AtSign, ShieldCheck, Truck, Leaf } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { getSettings } from "@/lib/settings";
 import { COMPANY } from "@/lib/company";
 
 export async function Footer() {
   const [settings, categories] = await Promise.all([
     getSettings(),
-    prisma.category.findMany({
-      where: { isActive: true },
-      orderBy: { order: "asc" },
-      select: { name: true, slug: true },
-    }),
+    cachedCatalog(["footer-categories"], () =>
+      prisma.category.findMany({
+        where: { isActive: true },
+        orderBy: { order: "asc" },
+        select: { name: true, slug: true },
+      })
+    ),
   ]);
 
   return (

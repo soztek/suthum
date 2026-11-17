@@ -15,7 +15,7 @@ export const getSettings = unstable_cache(
     return settings;
   },
   ["settings-main"],
-  { tags: ["settings"], revalidate: 300 }
+  { tags: ["settings"], revalidate: 60 * 60 * 6 }
 );
 
 export type Settings = Awaited<ReturnType<typeof getSettings>>;

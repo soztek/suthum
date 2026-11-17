@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { toProductDTO } from "@/lib/serialize";
 import { orderByFor } from "@/lib/sort";
 import { ProductList } from "@/components/ProductList";
@@ -18,7 +19,7 @@ export default async function AllProductsPage({
 }) {
   const { sirala, gorunum, kategori } = await searchParams;
 
-  const [categories, products] = await Promise.all([
+  const [categories, products] = await cachedCatalog(["all-products", sirala, kategori], () => Promise.all([
     prisma.category.findMany({
       where: { isActive: true },
       orderBy: { order: "asc" },
@@ -29,7 +30,7 @@ export default async function AllProductsPage({
       include: { category: true },
       orderBy: orderByFor(sirala),
     }),
-  ]);
+  ]));
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">

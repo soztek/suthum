@@ -15,5 +15,5 @@ export const getNavCategories = unstable_cache(
     });
   },
   ["nav-categories"],
-  { tags: ["categories"], revalidate: 300 }
+  { tags: ["categories"], revalidate: 60 * 60 * 6 }
 );

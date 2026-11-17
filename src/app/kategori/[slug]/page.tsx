@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { toProductDTO } from "@/lib/serialize";
 import { orderByFor } from "@/lib/sort";
 import { ProductList } from "@/components/ProductList";
@@ -14,7 +15,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const category = await prisma.category.findUnique({ where: { slug } });
+  const category = await cachedCatalog(["category-meta", slug], () => prisma.category.findUnique({ where: { slug } }));
   return { title: category?.name ?? "Kategori" };
 }
 
@@ -28,7 +29,7 @@ export default async function CategoryPage({
   const { slug } = await params;
   const { sirala, gorunum } = await searchParams;
 
-  const [category, allCategories] = await Promise.all([
+  const [category, allCategories] = await cachedCatalog(["category", slug, sirala], () => Promise.all([
     prisma.category.findUnique({
       where: { slug },
       include: {
@@ -44,7 +45,7 @@ export default async function CategoryPage({
       orderBy: { order: "asc" },
       include: { _count: { select: { products: true } } },
     }),
-  ]);
+  ]));
 
   if (!category) notFound();
 

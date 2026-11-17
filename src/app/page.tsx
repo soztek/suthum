@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { ArrowRight, Truck, Leaf, Award, Snowflake } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { getSettings } from "@/lib/settings";
 import { toProductDTO } from "@/lib/serialize";
 import { ProductCard } from "@/components/ProductCard";
 import { Reviews } from "@/components/Reviews";
 
 export default async function HomePage() {
-  const [settings, categories, featured, packages] = await Promise.all([
+  const [settings, [categories, featured, packages]] = await Promise.all([
     getSettings(),
+    cachedCatalog(["home"], () => Promise.all([
     prisma.category.findMany({
       where: { isActive: true },
       orderBy: { order: "asc" },
@@ -25,6 +27,7 @@ export default async function HomePage() {
       include: { category: true },
       orderBy: { order: "asc" },
     }),
+    ])),
   ]);
 
   return (

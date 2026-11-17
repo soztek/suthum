@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 
 const BASE = "https://suthum.com";
 
@@ -21,13 +22,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/gizlilik", priority: 0.3, freq: "yearly" },
   ];
 
-  const [categories, products] = await Promise.all([
+  const [categories, products] = await cachedCatalog(["sitemap"], () => Promise.all([
     prisma.category.findMany({ where: { isActive: true }, select: { slug: true } }),
     prisma.product.findMany({
       where: { isActive: true },
       select: { slug: true, updatedAt: true },
     }),
-  ]);
+  ]));
 
   const staticEntries: MetadataRoute.Sitemap = staticPaths.map((s) => ({
     url: `${BASE}${s.path}`,
@@ -45,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const productEntries: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${BASE}/urun/${p.slug}`,
-    lastModified: p.updatedAt,
+    lastModified: new Date(p.updatedAt),
     changeFrequency: "weekly",
     priority: 0.7,
   }));

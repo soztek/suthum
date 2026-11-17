@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Star, Snowflake, Truck, ShieldCheck, Leaf } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { toProductDTO } from "@/lib/serialize";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductCard } from "@/components/ProductCard";
@@ -15,7 +16,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = await prisma.product.findUnique({ where: { slug } });
+  const product = await cachedCatalog(["product-meta", slug], () => prisma.product.findUnique({ where: { slug } }));
   return {
     title: product?.name ?? "Ürün",
     description: product?.description ?? undefined,
@@ -28,25 +29,29 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: { category: true },
-  });
+  const product = await cachedCatalog(["product", slug], () =>
+    prisma.product.findUnique({
+      where: { slug },
+      include: { category: true },
+    })
+  );
 
   if (!product || !product.isActive) notFound();
 
   const dto = toProductDTO(product);
   const discount = discountPercent(dto.price, dto.compareAt);
 
-  const related = await prisma.product.findMany({
-    where: {
-      isActive: true,
-      categoryId: product.categoryId,
-      id: { not: product.id },
-    },
-    include: { category: true },
-    take: 4,
-  });
+  const related = await cachedCatalog(["related", product.id], () =>
+    prisma.product.findMany({
+      where: {
+        isActive: true,
+        categoryId: product.categoryId,
+        id: { not: product.id },
+      },
+      include: { category: true },
+      take: 4,
+    })
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">

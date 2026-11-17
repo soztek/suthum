@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Tag, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { toProductDTO } from "@/lib/serialize";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductImage } from "@/components/ProductImage";
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CampaignsPage() {
-  const [banners, products] = await Promise.all([
+  const [banners, products] = await cachedCatalog(["campaigns"], () => Promise.all([
     prisma.campaign.findMany({
       where: { isActive: true },
       orderBy: [{ order: "asc" }, { createdAt: "desc" }],
@@ -26,7 +27,7 @@ export default async function CampaignsPage() {
       include: { category: true },
       orderBy: { order: "asc" },
     }),
-  ]);
+  ]));
 
   const hasContent = banners.length > 0 || products.length > 0;
 
