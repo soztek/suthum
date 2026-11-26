@@ -24,7 +24,45 @@ const schema = z.object({
   paymentMethod: z.enum(["card", "havale"]).optional(),
   createAccount: z.boolean().optional(),
   password: z.string().optional(),
+  invoice: z
+    .object({
+      type: z.enum(["bireysel", "kurumsal"]),
+      tckn: z.string().optional(),
+      companyName: z.string().optional(),
+      taxOffice: z.string().optional(),
+      taxNo: z.string().optional(),
+      sameAsDelivery: z.boolean().optional(),
+      address: z.string().optional(),
+    })
+    .optional(),
 });
+
+/** Fatura bilgilerini doğrular; hata varsa mesaj döner, yoksa null. */
+function validateInvoice(inv: {
+  type: "bireysel" | "kurumsal";
+  tckn?: string;
+  companyName?: string;
+  taxOffice?: string;
+  taxNo?: string;
+  sameAsDelivery?: boolean;
+  address?: string;
+}): string | null {
+  if (inv.type === "bireysel") {
+    if (!/^\d{11}$/.test((inv.tckn ?? "").trim())) {
+      return "Fatura için geçerli bir TC Kimlik No girin (11 hane).";
+    }
+  } else {
+    if (!(inv.companyName ?? "").trim()) return "Firma ünvanı gerekli.";
+    if (!(inv.taxOffice ?? "").trim()) return "Vergi dairesi gerekli.";
+    if (!/^\d{10,11}$/.test((inv.taxNo ?? "").trim())) {
+      return "Geçerli bir vergi no girin (10 hane).";
+    }
+  }
+  if (inv.sameAsDelivery === false && (inv.address ?? "").trim().length < 10) {
+    return "Fatura adresi gerekli.";
+  }
+  return null;
+}
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -43,6 +81,25 @@ export async function POST(req: Request) {
   }
   const { customer, items } = parsed.data;
   const payMethod = parsed.data.paymentMethod ?? "card";
+
+  // Fatura bilgileri (ticari fatura için zorunlu)
+  const invoice = parsed.data.invoice;
+  if (!invoice) {
+    return NextResponse.json({ error: "Fatura bilgileri gerekli." }, { status: 400 });
+  }
+  const invoiceError = validateInvoice(invoice);
+  if (invoiceError) {
+    return NextResponse.json({ error: invoiceError }, { status: 400 });
+  }
+  const invoiceData = {
+    invoiceType: invoice.type,
+    tckn: invoice.type === "bireysel" ? invoice.tckn?.trim() || null : null,
+    companyName: invoice.type === "kurumsal" ? invoice.companyName?.trim() || null : null,
+    taxOffice: invoice.type === "kurumsal" ? invoice.taxOffice?.trim() || null : null,
+    taxNo: invoice.type === "kurumsal" ? invoice.taxNo?.trim() || null : null,
+    invoiceAddress:
+      invoice.sameAsDelivery === false ? invoice.address?.trim() || null : null,
+  };
 
   // Ürünleri veritabanından oku — fiyatlara SUNUCUDA karar verilir.
   const products = await prisma.product.findMany({
@@ -119,6 +176,7 @@ export async function POST(req: Request) {
       note: customer.note || null,
       userId,
       paymentMethod: payMethod,
+      ...invoiceData,
       subtotal: new Prisma.Decimal(subtotal.toFixed(2)),
       shipping: new Prisma.Decimal(shipping.toFixed(2)),
       total: new Prisma.Decimal(total.toFixed(2)),

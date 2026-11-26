@@ -125,6 +125,23 @@ export default async function AdminOrders({
                   <p className="text-sm text-ink/60">{o.phone} · {o.email}</p>
                   <p className="mt-1 text-sm text-ink/60">{o.address}, {o.district ? `${o.district}, ` : ""}{o.city}</p>
                   {o.note && <p className="mt-1 text-sm text-orange-700">Not: {o.note}</p>}
+
+                  <div className="mt-3 rounded-lg bg-green-50/70 p-2.5 text-sm">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-ink/40">
+                      Fatura · {o.invoiceType === "kurumsal" ? "Kurumsal" : "Bireysel"}
+                    </span>
+                    {o.invoiceType === "kurumsal" ? (
+                      <p className="mt-0.5 text-ink/70">
+                        {o.companyName}<br />
+                        VD: {o.taxOffice} · VKN: {o.taxNo}
+                      </p>
+                    ) : (
+                      <p className="mt-0.5 text-ink/70">TCKN: {o.tckn ?? "—"}</p>
+                    )}
+                    {o.invoiceAddress && (
+                      <p className="mt-0.5 text-ink/60">Fatura adresi: {o.invoiceAddress}</p>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink/40">Ürünler</h4>

@@ -121,6 +121,15 @@ export async function sendOrderEmails(orderId: string): Promise<void> {
            <b>E-posta:</b> ${order.email}<br/>
            <b>Adres:</b> ${order.address}, ${order.district ? order.district + ", " : ""}${order.city}
            ${order.note ? `<br/><b>Not:</b> ${order.note}` : ""}
+         </div>
+         <div style="margin-top:10px;padding:14px;background:#fff5ea;border-radius:10px;color:#333;font-size:14px">
+           <b>🧾 Fatura (${order.invoiceType === "kurumsal" ? "Kurumsal" : "Bireysel"}):</b><br/>
+           ${
+             order.invoiceType === "kurumsal"
+               ? `${order.companyName ?? ""}<br/>Vergi Dairesi: ${order.taxOffice ?? ""} · VKN: ${order.taxNo ?? ""}`
+               : `TC Kimlik No: ${order.tckn ?? "—"}`
+           }
+           ${order.invoiceAddress ? `<br/>Fatura Adresi: ${order.invoiceAddress}` : ""}
          </div>`
       ),
     });

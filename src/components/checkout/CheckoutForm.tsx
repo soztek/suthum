@@ -34,6 +34,15 @@ export function CheckoutForm({
   const [payMethod, setPayMethod] = useState<"card" | "havale">("card");
   const [createAccount, setCreateAccount] = useState(false);
   const [password, setPassword] = useState("");
+  const [invoiceType, setInvoiceType] = useState<"bireysel" | "kurumsal">("bireysel");
+  const [invoiceDiff, setInvoiceDiff] = useState(false);
+  const [inv, setInv] = useState({
+    tckn: "",
+    companyName: "",
+    taxOffice: "",
+    taxNo: "",
+    address: "",
+  });
   const [form, setForm] = useState({
     fullName: initial?.fullName ?? "",
     email: initial?.email ?? "",
@@ -58,6 +67,24 @@ export function CheckoutForm({
       setError("Üyelik için en az 6 karakterli bir şifre girin.");
       return;
     }
+    // Fatura doğrulaması
+    if (invoiceType === "bireysel") {
+      if (!/^\d{11}$/.test(inv.tckn.trim())) {
+        setError("Fatura için geçerli bir TC Kimlik No girin (11 hane).");
+        return;
+      }
+    } else {
+      if (!inv.companyName.trim()) return setError("Firma ünvanı gerekli.");
+      if (!inv.taxOffice.trim()) return setError("Vergi dairesi gerekli.");
+      if (!/^\d{10,11}$/.test(inv.taxNo.trim())) {
+        setError("Geçerli bir vergi no girin (10 hane).");
+        return;
+      }
+    }
+    if (invoiceDiff && inv.address.trim().length < 10) {
+      setError("Fatura adresi gerekli.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/checkout", {
@@ -69,6 +96,15 @@ export function CheckoutForm({
           paymentMethod: payMethod,
           createAccount: !loggedIn && createAccount,
           password: !loggedIn && createAccount ? password : undefined,
+          invoice: {
+            type: invoiceType,
+            tckn: invoiceType === "bireysel" ? inv.tckn : undefined,
+            companyName: invoiceType === "kurumsal" ? inv.companyName : undefined,
+            taxOffice: invoiceType === "kurumsal" ? inv.taxOffice : undefined,
+            taxNo: invoiceType === "kurumsal" ? inv.taxNo : undefined,
+            sameAsDelivery: !invoiceDiff,
+            address: invoiceDiff ? inv.address : undefined,
+          },
         }),
       });
       const data = await res.json();
@@ -145,6 +181,78 @@ export function CheckoutForm({
               <textarea value={form.note} onChange={(e) => update("note", e.target.value)} rows={2} className={inputCls} placeholder="Eklemek istedikleriniz (opsiyonel)" />
             </div>
           </div>
+        </div>
+
+        {/* Fatura Bilgileri */}
+        <div className="rounded-2xl border border-green-100 bg-white p-6">
+          <h2 className="mb-4 text-lg font-bold text-ink">Fatura Bilgileri</h2>
+          <div className="mb-4 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setInvoiceType("bireysel")}
+              className={`rounded-xl border-2 px-4 py-3 text-sm font-semibold transition ${
+                invoiceType === "bireysel" ? "border-green-500 bg-green-50/60 text-ink" : "border-green-100 text-ink/60 hover:border-green-300"
+              }`}
+            >
+              Bireysel
+            </button>
+            <button
+              type="button"
+              onClick={() => setInvoiceType("kurumsal")}
+              className={`rounded-xl border-2 px-4 py-3 text-sm font-semibold transition ${
+                invoiceType === "kurumsal" ? "border-green-500 bg-green-50/60 text-ink" : "border-green-100 text-ink/60 hover:border-green-300"
+              }`}
+            >
+              Kurumsal (Firma)
+            </button>
+          </div>
+
+          {invoiceType === "bireysel" ? (
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-ink/70">TC Kimlik No *</label>
+              <input
+                inputMode="numeric"
+                maxLength={11}
+                value={inv.tckn}
+                onChange={(e) => setInv((s) => ({ ...s, tckn: e.target.value.replace(/\D/g, "") }))}
+                className={inputCls}
+                placeholder="11 haneli TC Kimlik No"
+              />
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="mb-1.5 block text-sm font-medium text-ink/70">Firma Ünvanı *</label>
+                <input value={inv.companyName} onChange={(e) => setInv((s) => ({ ...s, companyName: e.target.value }))} className={inputCls} placeholder="Örn: Örnek Gıda Ltd. Şti." />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-ink/70">Vergi Dairesi *</label>
+                <input value={inv.taxOffice} onChange={(e) => setInv((s) => ({ ...s, taxOffice: e.target.value }))} className={inputCls} placeholder="Örn: Kadıköy" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-ink/70">Vergi No *</label>
+                <input
+                  inputMode="numeric"
+                  maxLength={11}
+                  value={inv.taxNo}
+                  onChange={(e) => setInv((s) => ({ ...s, taxNo: e.target.value.replace(/\D/g, "") }))}
+                  className={inputCls}
+                  placeholder="10 haneli vergi no"
+                />
+              </div>
+            </div>
+          )}
+
+          <label className="mt-4 flex items-center gap-2 text-sm text-ink/80">
+            <input type="checkbox" checked={invoiceDiff} onChange={(e) => setInvoiceDiff(e.target.checked)} className="h-4 w-4 accent-green-600" />
+            Fatura adresim teslimat adresimden farklı
+          </label>
+          {invoiceDiff && (
+            <div className="mt-3">
+              <label className="mb-1.5 block text-sm font-medium text-ink/70">Fatura Adresi *</label>
+              <textarea value={inv.address} onChange={(e) => setInv((s) => ({ ...s, address: e.target.value }))} rows={3} className={inputCls} placeholder="Fatura adresi" />
+            </div>
+          )}
         </div>
 
         {!loggedIn && (

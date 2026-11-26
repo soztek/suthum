@@ -87,6 +87,14 @@ model Order {
   iyziPaymentId String?
   trackingNo    String? // kargo takip numarası
 
+  // Fatura bilgileri (ticari fatura için)
+  invoiceType    String  @default("bireysel") // "bireysel" | "kurumsal"
+  tckn           String? // bireysel: TC Kimlik No
+  companyName    String? // kurumsal: firma ünvanı
+  taxOffice      String? // kurumsal: vergi dairesi
+  taxNo          String? // kurumsal: vergi no (VKN)
+  invoiceAddress String? @db.Text // farklıysa fatura adresi (boşsa teslimat adresi)
+
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
